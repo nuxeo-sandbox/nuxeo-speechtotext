@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<component name="org.nuxeo.labs.SpeechToText.commandline" version="1.0">
+  <require>org.nuxeo.ecm.platform.commandline.executor.service.defaultContrib</require>
+  <extension point="command"
+    target="org.nuxeo.ecm.platform.commandline.executor.service.CommandLineExecutorComponent">
+    <command enabled="true" name="ffmpeg-extract-audio">
+      <commandLine>ffmpeg</commandLine>
+      <parameterString> -i #{sourceFilePath} -s #{width}x#{height} -ac 1 -vn -acodec flac -f flac #{targetFilePath}
+      </parameterString>
+      <installationDirective>You need to install ffmpeg from http://ffmpeg.org (apt-get install ffmpeg)
+      </installationDirective>
+    </command>
+  </extension>
+
+  <!--this converter calls the commandline, is linked by the parameter CommandLineName, examples can be found on explorer.nuxeo -->
+  <extension point="converter" target="org.nuxeo.ecm.core.convert.service.ConversionServiceImpl">
+    <converter class="org.nuxeo.ecm.platform.convert.plugins.CommandLineConverter" name="normalize-audio">
+      <destinationMimeType>audio/flac</destinationMimeType>
+      <parameters>
+        <parameter name="CommandLineName">ffmpeg-extract-audio</parameter>
+      </parameters>
+    </converter>
+
+  </extension>
+</component>
