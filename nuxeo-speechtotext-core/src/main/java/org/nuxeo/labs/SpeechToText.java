@@ -15,11 +15,11 @@
  *
  * Contributors:
  *     Eliot Kim
+ *     Thibaud Arguillere
  */
 package org.nuxeo.labs;
 
 import org.nuxeo.ecm.core.api.Blob;
-import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.NuxeoException;
 
 import com.google.cloud.speech.v1.RecognitionConfig;
@@ -27,10 +27,16 @@ import com.google.cloud.speech.v1.RecognitionConfig.AudioEncoding;
 
 public interface SpeechToText {
 
+    /*
+     * Convert and audio file fo FLAC. If the file is a video, extracts the audio to FLAC. (See the command line XML
+     * contribution)
+     */
+    public static final String AUDIO_TO_FLAC_CONVERTER = "audio-to-flac";
+
     /**
      * Returns the transcript of the audio file.<br>
-     * This will always convert the input blob to FLAC/44100Hz before sending it to the cloud service, using the
-     * "normalize-audio" converter provided by the service<br>
+     * This will always convert the input blob to FLAC before sending it to the cloud service, using the
+     * <code>AUDIO_TO_FLAC_CONVERTER</code> converter provided by the service<br>
      *
      * @param Blob audio file, or at least a file that can be converted to audio
      * @param languageCode of the audio file
@@ -40,7 +46,6 @@ public interface SpeechToText {
 
     /**
      * Returns the transcript of the audio file.<br>
-     * This will always convert the input blob to FLAC/44100Hz before sending it to the cloud service
      *
      * @param Blob audio file
      * @param audioEncoding of the audio file
@@ -51,15 +56,8 @@ public interface SpeechToText {
     String run(Blob blob, String audioEncoding, int sampleRateHertz, String languageCode);
 
     /**
-     * @param Document containing an audio file, or at least a file that can be converted to audio
-     * @return string of text
-     */
-    DocumentModel transformsText(DocumentModel doc);
-
-    /**
-     * return the RecognitionConfig.AudioEncoding value for the name of the enum.<br>
-     * Tries to normalize the value.<br>
-     * Useful for Operations, where a caller will pass a string, not an enum value
+     * Helper that returns the RecognitionConfig.AudioEncoding value for the name of the enum.<br>
+     * (Useful for Operations, where a caller will pass a string, not an enum value)
      *
      * @param valueStr
      * @return the enum value for the input string

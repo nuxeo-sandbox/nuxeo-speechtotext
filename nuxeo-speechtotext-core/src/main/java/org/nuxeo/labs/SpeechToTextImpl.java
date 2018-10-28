@@ -15,6 +15,7 @@
  *
  * Contributors:
  *     Eliot Kim
+ *     Thibaud Arguillere
  */
 package org.nuxeo.labs;
 
@@ -23,8 +24,9 @@ import com.google.api.gax.core.FixedCredentialsProvider;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.speech.v1.*;
 import com.google.protobuf.ByteString;
+
+import org.apache.commons.lang3.StringUtils;
 import org.nuxeo.ecm.core.api.Blob;
-import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
 import org.nuxeo.ecm.core.api.blobholder.SimpleBlobHolder;
@@ -107,7 +109,7 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
 
         Blob normalized = normalizeAudio(blob);
 
-        return run(normalized, "FLAC", 44100, languageCode);
+        return run(normalized, null, -1, languageCode);
     }
 
     @Override
@@ -129,15 +131,33 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
             // Reads the audio file into memory
             byte[] data = blob.getByteArray();
             ByteString audioBytes = ByteString.copyFrom(data);
-
-            RecognitionConfig.AudioEncoding encoding = SpeechToText.EncodingNameToEnum(audioEncoding);
-
-            RecognitionConfig config = RecognitionConfig.newBuilder()
-                                                        .setEncoding(encoding)
-                                                        .setSampleRateHertz(sampleRateHertz)
-                                                        .setLanguageCode(languageCode)
-                                                        .build();
             RecognitionAudio audio = RecognitionAudio.newBuilder().setContent(audioBytes).build();
+
+            /*
+             * Google Cloud doc (2018-10-28): << You are not required to specify the encoding and sample rate for WAV or
+             * FLAC files. If omitted, Speech-to-Text automatically determines the encoding and sample rate for WAV or
+             * FLAC files based on the file header. If you specify an encoding or sample rate value that does not match
+             * the value in the file header, then Speech-to-Text returns an error. >>
+             */
+            String mimeType = blob.getMimeType();
+            boolean needsParameters = true;
+            if (StringUtils.isNotBlank(mimeType)) {
+                String mimeTypeLowerCase = mimeType.toLowerCase();
+                needsParameters = mimeTypeLowerCase.indexOf("flac") < 0 && mimeTypeLowerCase.indexOf("wav") < 0;
+            }
+
+            RecognitionConfig config;
+            if (needsParameters) {
+                RecognitionConfig.AudioEncoding encoding = SpeechToText.EncodingNameToEnum(audioEncoding);
+                config = RecognitionConfig.newBuilder()
+                                          .setEncoding(encoding)
+                                          .setSampleRateHertz(sampleRateHertz)
+                                          .setLanguageCode(languageCode)
+                                          .build();
+            } else {
+                config = RecognitionConfig.newBuilder().setLanguageCode(languageCode).build();
+            }
+
             // Performs speech recognition on the audio file
             RecognizeResponse response = speechClient.recognize(config, audio);
             List<SpeechRecognitionResult> results = response.getResultsList();
@@ -157,68 +177,13 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
         }
     }
 
-    @Override
-    public DocumentModel transformsText(DocumentModel doc) {
-
-        Blob blob = (Blob) doc.getPropertyValue("file:content");
-        Blob normalized = normalizeAudio(blob);
-
-        ArrayList<String> finalResult = null;
-        try {
-            String path = Framework.getProperty("google.credential.path");
-            // sets user credentials through the .json file so that it doesnt have to be set in terminal
-            GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(new File(path)))
-                                                             .createScoped(Lists.newArrayList(
-                                                                     "https://www.googleapis.com/auth/cloud-platform"));
-            SpeechSettings speechSettings = SpeechSettings.newBuilder()
-                                                          .setCredentialsProvider(
-                                                                  FixedCredentialsProvider.create(credentials))
-                                                          .build();
-            SpeechClient speechClient = SpeechClient.create(speechSettings);
-
-            // The path to the audio file to transcribe
-            // String fileName = input;
-
-            // to store final results
-            finalResult = new ArrayList<String>();
-
-            // Reads the audio file into memory
-            byte[] data = normalized.getByteArray();
-            ByteString audioBytes = ByteString.copyFrom(data);
-
-            RecognitionConfig config = RecognitionConfig.newBuilder()
-                                                        .setEncoding(RecognitionConfig.AudioEncoding.FLAC)
-                                                        .setSampleRateHertz(44100)
-                                                        .setLanguageCode("en-US")
-                                                        .build();
-            RecognitionAudio audio = RecognitionAudio.newBuilder().setContent(audioBytes).build();
-            // Performs speech recognition on the audio file
-            RecognizeResponse response = speechClient.recognize(config, audio);
-            List<SpeechRecognitionResult> results = response.getResultsList();
-
-            for (SpeechRecognitionResult result : results) {
-                // There can be several alternative transcripts for a given chunk of speech. Just use the
-                // first (most likely) one here.
-                SpeechRecognitionAlternative alternative = result.getAlternativesList().get(0);
-                finalResult.add(alternative.getTranscript());
-                // System.out.printf("Transcription: %s%n", alternative.getTranscript());
-            }
-            doc.setPropertyValue("dc:description", finalResult.get(0));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        // should return a Document Model
-        return doc;
-
-    };
-
     protected Blob normalizeAudio(Blob input) {
-        ConversionService service = Framework.getService(ConversionService.class); // can get service names from
-                                                                                   // explorer.nuxeo
+
+        ConversionService service = Framework.getService(ConversionService.class);
+
         BlobHolder blobholder = new SimpleBlobHolder(input);
 
-        BlobHolder result = service.convert("normalize-audio", blobholder, new HashMap<>());
+        BlobHolder result = service.convert(AUDIO_TO_FLAC_CONVERTER, blobholder, new HashMap<>());
 
         return result.getBlob();
 

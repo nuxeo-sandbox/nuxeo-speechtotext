@@ -15,6 +15,7 @@
  *
  * Contributors:
  *     Eliot Kim
+ *     Thibaud Arguillere
  */
 package org.nuxeo.labs;
 
@@ -22,14 +23,16 @@ import org.nuxeo.ecm.automation.core.Constants;
 import org.nuxeo.ecm.automation.core.annotations.Context;
 import org.nuxeo.ecm.automation.core.annotations.Operation;
 import org.nuxeo.ecm.automation.core.annotations.OperationMethod;
+import org.nuxeo.ecm.automation.core.annotations.Param;
+import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.runtime.api.Framework;
 
 /**
  *
  */
-@Operation(id = SpeechToTextOperation.ID, category = Constants.CAT_CONVERSION, label = "Speech to Text", description = "")
+@Operation(id = SpeechToTextOperation.ID, category = Constants.CAT_CONVERSION, label = "Speech to Text", description = "Send the blob found in blobXpath (default file:content) to SpeechToText, using the languageCode."
+        + " Return the transcript in the transcriptXpath field. Optionaly save the document (default false)")
 public class SpeechToTextOperation {
 
     public static final String ID = "Convert.SpeechToTextOp";
@@ -37,10 +40,38 @@ public class SpeechToTextOperation {
     @Context
     protected CoreSession session;
 
+    @Context
+    protected SpeechToText speechToText;
+
+    @Param(name = "blobXpath", required = false, values = { "file:content" })
+    protected String blobXpath = "file:content";
+
+    @Param(name = "transcriptXpath", required = true)
+    protected String transcriptXpath;
+
+    @Param(name = "languageCode", required = true, values = { "en-US" })
+    protected String languageCode = "en-US";
+
+    @Param(name = "saveDocument", required = false, values = { "false" })
+    protected boolean saveDocument = false;
+
     @OperationMethod
     public DocumentModel run(DocumentModel input) {
-        SpeechToText service = Framework.getService(SpeechToText.class);
-        input = service.transformsText(input);
+
+        String transcript = null;
+
+        Blob blob = (Blob) input.getPropertyValue(blobXpath);
+
+        if (blob != null) {
+            transcript = speechToText.run(blob, languageCode);
+        }
+
+        input.setPropertyValue(transcriptXpath, transcript);
+
+        if (saveDocument) {
+            input = session.saveDocument(input);
+        }
+
         return input;
 
     }

@@ -21,6 +21,7 @@ package org.nuxeo.labs;
 import com.google.inject.Inject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
 import org.nuxeo.ecm.core.api.blobholder.SimpleBlobHolder;
 import org.nuxeo.ecm.core.api.impl.blob.FileBlob;
@@ -33,6 +34,7 @@ import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import java.io.File;
 import java.util.HashMap;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(FeaturesRunner.class)
@@ -48,8 +50,11 @@ public class TestConverter {
         BlobHolder input = new SimpleBlobHolder(
                 new FileBlob(new File(getClass().getResource("/output-weather.aac").getPath())));
         assertNotNull(input);
-        BlobHolder result = service.convert("normalize-audio", input, new HashMap<>());
+        BlobHolder result = service.convert(SpeechToText.AUDIO_TO_FLAC_CONVERTER, input, new HashMap<>());
         assertNotNull(result);
-        assertNotNull(result.getBlob());
+
+        Blob b = result.getBlob();
+        assertNotNull(b);
+        assertEquals("audio/flac", b.getMimeType());
     }
 }

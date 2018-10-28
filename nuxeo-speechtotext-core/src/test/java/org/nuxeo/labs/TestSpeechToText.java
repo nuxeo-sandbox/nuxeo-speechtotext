@@ -15,6 +15,7 @@
  *
  * Contributors:
  *     Eliot Kim
+ *     Thibaud Arguillere
  */
 package org.nuxeo.labs;
 
@@ -25,14 +26,17 @@ import static org.junit.Assume.assumeTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.common.utils.FileUtils;
+import org.nuxeo.ecm.automation.AutomationService;
+import org.nuxeo.ecm.automation.OperationChain;
+import org.nuxeo.ecm.automation.OperationContext;
+import org.nuxeo.ecm.automation.test.AutomationFeature;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.ecm.core.api.impl.blob.FileBlob;
-import org.nuxeo.ecm.core.test.CoreFeature;
-import org.nuxeo.ecm.platform.test.PlatformFeature;
-import org.nuxeo.runtime.api.Framework;
+import org.nuxeo.ecm.core.test.DefaultRepositoryInit;
+import org.nuxeo.ecm.core.test.annotations.Granularity;
+import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
@@ -42,15 +46,19 @@ import com.google.inject.Inject;
 import java.io.File;
 
 @RunWith(FeaturesRunner.class)
-@Features({ PlatformFeature.class, CoreFeature.class })
+@Features(AutomationFeature.class)
+@RepositoryConfig(init = DefaultRepositoryInit.class, cleanup = Granularity.METHOD)
 @Deploy("org.nuxeo.labs.nuxeo-speechtotext-core")
 public class TestSpeechToText {
 
     @Inject
-    protected SpeechToText speechToText;
+    CoreSession coreSession;
 
     @Inject
-    CoreSession coreSession;
+    protected AutomationService automationService;
+
+    @Inject
+    protected SpeechToText speechToText;
 
     @Test
     public void testServiceWithBlobToConvert() {
@@ -69,29 +77,30 @@ public class TestSpeechToText {
     }
 
     @Test
-    public void testService() {
+    public void testDocumentOperation() throws Exception {
 
         assumeTrue("Google credentials not found => no test", TestUtils.loadGoogleCredentials());
 
-
-        Framework.getProperties().setProperty("google.credential.path",
-                getClass().getResource("/credential.json").getPath());
-
         DocumentModel doc = coreSession.createDocumentModel("/", "myFile", "File");
-        doc.setPropertyValue("file:content",
-                new FileBlob(new File(getClass().getResource("/output-weather.aac").getPath())));
+        doc.setPropertyValue("dc:title", "myFile");
+        File audioFile = FileUtils.getResourceFileFromContext("output-weather.aac");
+        doc.setPropertyValue("file:content", new FileBlob(audioFile));
 
-        coreSession.createDocument(doc);
+        doc = coreSession.createDocument(doc);
         coreSession.save();
 
-        PathRef docPath = new PathRef(doc.getPathAsString());
-        doc = coreSession.getDocument(docPath);
+        OperationContext ctx = new OperationContext(coreSession);
+        OperationChain chain = new OperationChain("testDocumentOperation");
+        // Let default values for blobXpath and saveDocument
+        ctx.setInput(doc);
+        chain.add(SpeechToTextOperation.ID).set("transcriptXpath", "dc:description").set("languageCode", "en-US");
 
-        DocumentModel result = speechToText.transformsText(doc);
+        DocumentModel result = (DocumentModel) automationService.run(ctx, chain);
 
         assertNotNull(result);
-        assertNotNull(doc.getPropertyValue("dc:description"));
-        assertTrue(((String) doc.getPropertyValue("dc:description")).length() > 0);
+        String description = (String) doc.getPropertyValue("dc:description");
+        assertNotNull(description);
+        assertTrue(description.indexOf("good morning Cleveland") > -1);
 
     }
 }
