@@ -63,7 +63,8 @@ public class SpeechToTextOperation {
         Blob blob = (Blob) input.getPropertyValue(blobXpath);
 
         if (blob != null) {
-            transcript = speechToText.run(blob, languageCode);
+        	SpeechToTextResponse response = speechToText.run(blob, languageCode);;
+            transcript = response.getText();
         }
 
         input.setPropertyValue(transcriptXpath, transcript);

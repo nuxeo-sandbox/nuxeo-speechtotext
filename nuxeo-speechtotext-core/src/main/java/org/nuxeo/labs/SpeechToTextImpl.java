@@ -39,9 +39,7 @@ import org.nuxeo.runtime.model.DefaultComponent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * This is the implementation for Google Speech To text.
@@ -129,6 +127,11 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
 		if (StringUtils.isBlank(credentialsFilePath)) {
 			credentialsFilePath = System.getenv(CREDENTIALS_PATH_ENV_VAR);
 		}
+		if (StringUtils.isBlank(credentialsFilePath)) {
+			throw new NuxeoException("Credentials file for Google SPeech To Text APi not found in nuxeo.conf ("
+					+ CREDENTIALS_PATH_PARAM + ") nor in an environement variable (" + CREDENTIALS_PATH_ENV_VAR + ")");
+		}
+
 		GoogleCredentials credentials = null;
 		try {
 			credentials = GoogleCredentials.fromStream(new FileInputStream(new File(credentialsFilePath)))
@@ -141,7 +144,7 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
 	}
 
 	@Override
-	public String run(Blob blob, String languageCode) {
+	public SpeechToTextResponse run(Blob blob, String languageCode) {
 
 		Blob normalized = normalizeAudio(blob);
 
@@ -149,13 +152,9 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
 	}
 
 	@Override
-	public String run(Blob blob, String audioEncoding, int sampleRateHertz, String languageCode) {
-
-		ArrayList<String> finalResult = null;
+	public SpeechToTextResponse run(Blob blob, String audioEncoding, int sampleRateHertz, String languageCode) {
 
 		try {
-
-			finalResult = new ArrayList<String>();
 
 			// Reads the audio file into memory
 			byte[] data = blob.getByteArray();
@@ -187,28 +186,10 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
 			}
 			RecognitionConfig config = builder.build();
 
-			/*
-			 * if (needsParameters) { RecognitionConfig.AudioEncoding encoding =
-			 * SpeechToText.EncodingNameToEnum(audioEncoding); config =
-			 * RecognitionConfig.newBuilder().setEncoding(encoding).setSampleRateHertz(
-			 * sampleRateHertz) .setLanguageCode(languageCode).build(); } else { config =
-			 * RecognitionConfig.newBuilder().setLanguageCode(languageCode).build(); }
-			 */
-
 			// Performs speech recognition on the audio file
 			RecognizeResponse response = getSpeechClient().recognize(config, audio);
-			List<SpeechRecognitionResult> results = response.getResultsList();
 
-			for (SpeechRecognitionResult result : results) {
-				// There can be several alternative transcripts for a given chunk of speech.
-				// Just use the
-				// first (most likely) one here.
-				SpeechRecognitionAlternative alternative = result.getAlternativesList().get(0);
-				finalResult.add(alternative.getTranscript());
-				// System.out.printf("Transcription: %s%n", alternative.getTranscript());
-			}
-
-			return finalResult.get(0);
+			return new SpeechToTextGoogleResponse(response);
 
 		} catch (IOException e) {
 			throw new NuxeoException("Error getting the Speech-to-Text result", e);

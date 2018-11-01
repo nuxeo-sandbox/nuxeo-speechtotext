@@ -42,7 +42,7 @@ public interface SpeechToText {
      * @param languageCode of the audio file
      * @return string of text
      */
-    String run(Blob blob, String languageCode);
+    SpeechToTextResponse run(Blob blob, String languageCode);
 
     /**
      * Returns the transcript of the audio file.<br>
@@ -52,9 +52,9 @@ public interface SpeechToText {
      * @param audioEncoding of the audio file
      * @param sampleRateHertz of the audio file
      * @param languageCode of the audio file
-     * @return string of text
+     * @return the response from the provider
      */
-    String run(Blob blob, String audioEncoding, int sampleRateHertz, String languageCode);
+    SpeechToTextResponse run(Blob blob, String audioEncoding, int sampleRateHertz, String languageCode);
 
     /**
      * Helper that returns the RecognitionConfig.AudioEncoding value for the name of the enum.<br>

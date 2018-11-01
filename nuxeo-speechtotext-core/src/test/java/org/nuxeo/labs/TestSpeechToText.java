@@ -69,7 +69,9 @@ public class TestSpeechToText {
         Blob audioBlob = new FileBlob(audioFile);
 
         // Service will convert to flac
-        String transcript = speechToText.run(audioBlob, "en-US");
+        SpeechToTextResponse response = speechToText.run(audioBlob, "en-US");
+        assertNotNull(response);
+        String transcript = response.getText();
 
         assertNotNull(transcript);
         assertTrue(transcript.toLowerCase().indexOf("thanks for joining us") > -1);
