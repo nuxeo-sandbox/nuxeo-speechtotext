@@ -31,7 +31,7 @@ import org.nuxeo.runtime.api.Framework;
 public class TestUtils {
 
 	// Relative to the test "resources" folder
-	public static final String CREDENTIAL_FILE_TEST_PATH = "credential.json";
+	public static final String CREDENTIALS_FILE_TEST_PATH = "credentials.json";
 
 	protected static int credentialFileTest = -1;
 
@@ -47,24 +47,24 @@ public class TestUtils {
 		if (credentialFileTest == -1) {
 			credentialFileTest = 0;
 			try {
-				String credentialFilePath;
+				String credentialsFilePath;
 
 				// Check if set in nuxeo.conf (or equivalent) for the test
-				credentialFilePath = System.getProperty(SpeechToTextImpl.CREDENTIAL_PATH_PARAM);
+				credentialsFilePath = System.getProperty(SpeechToTextImpl.CREDENTIALS_PATH_PARAM);
 
 				// If not, check the specific env variable.
-				if (StringUtils.isBlank(credentialFilePath)) {
-					credentialFilePath = System.getenv(SpeechToTextImpl.CREDENTIAL_PATH_ENV_VAR);
+				if (StringUtils.isBlank(credentialsFilePath)) {
+					credentialsFilePath = System.getenv(SpeechToTextImpl.CREDENTIALS_PATH_ENV_VAR);
 
 					// Still not there, try the local test file
-					if (StringUtils.isBlank(credentialFilePath)) {
-						credentialsJson = FileUtils.getResourceFileFromContext(CREDENTIAL_FILE_TEST_PATH);
+					if (StringUtils.isBlank(credentialsFilePath)) {
+						credentialsJson = FileUtils.getResourceFileFromContext(CREDENTIALS_FILE_TEST_PATH);
 						// We are here => no error, there is a CREDENTIAL_FILE_PATH file
-						credentialFilePath = credentialsJson.getAbsolutePath();
+						credentialsFilePath = credentialsJson.getAbsolutePath();
 					}
 				}
-				if (StringUtils.isNotBlank(credentialFilePath)) {
-					Framework.getProperties().setProperty(SpeechToTextImpl.CREDENTIAL_PATH_PARAM, credentialFilePath);
+				if (StringUtils.isNotBlank(credentialsFilePath)) {
+					Framework.getProperties().setProperty(SpeechToTextImpl.CREDENTIALS_PATH_PARAM, credentialsFilePath);
 					credentialFileTest = 1;
 				}
 

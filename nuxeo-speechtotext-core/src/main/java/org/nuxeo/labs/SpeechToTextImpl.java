@@ -49,11 +49,9 @@ import java.util.List;
  */
 public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
 
-	public static final String CREDENTIAL_PATH_PARAM = "google.speechtotext.credential";
+	public static final String CREDENTIALS_PATH_PARAM = "google.speechtotext.credentials";
 
-	public static final String API_KEY_PARAM = "google.speechtotext.key";
-	
-	public static final String CREDENTIAL_PATH_ENV_VAR = "GOOGLE_SPEECHTOTEXT_CREDENTIALS";
+	public static final String CREDENTIALS_PATH_ENV_VAR = "GOOGLE_SPEECHTOTEXT_CREDENTIALS";
 
 	protected volatile SpeechClient speechClient = null;
 
@@ -127,11 +125,13 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
 
 	protected GoogleCredentials getCredentials() {
 
-		String path = Framework.getProperty(CREDENTIAL_PATH_PARAM); //"google.credential.path"
+		String credentialsFilePath = Framework.getProperty(CREDENTIALS_PATH_PARAM);
+		if (StringUtils.isBlank(credentialsFilePath)) {
+			credentialsFilePath = System.getenv(CREDENTIALS_PATH_ENV_VAR);
+		}
 		GoogleCredentials credentials = null;
-
 		try {
-			credentials = GoogleCredentials.fromStream(new FileInputStream(new File(path)))
+			credentials = GoogleCredentials.fromStream(new FileInputStream(new File(credentialsFilePath)))
 					.createScoped(Lists.newArrayList("https://www.googleapis.com/auth/cloud-platform"));
 			return credentials;
 		} catch (IOException e) {
@@ -177,14 +177,23 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
 				needsParameters = mimeTypeLowerCase.indexOf("flac") < 0 && mimeTypeLowerCase.indexOf("wav") < 0;
 			}
 
-			RecognitionConfig config;
+			RecognitionConfig.Builder builder;
+			// Shared parameters
+			builder = RecognitionConfig.newBuilder().setLanguageCode(languageCode).setEnableAutomaticPunctuation(true);
+			// Specific
 			if (needsParameters) {
 				RecognitionConfig.AudioEncoding encoding = SpeechToText.EncodingNameToEnum(audioEncoding);
-				config = RecognitionConfig.newBuilder().setEncoding(encoding).setSampleRateHertz(sampleRateHertz)
-						.setLanguageCode(languageCode).build();
-			} else {
-				config = RecognitionConfig.newBuilder().setLanguageCode(languageCode).build();
+				builder = builder.setEncoding(encoding).setSampleRateHertz(sampleRateHertz);
 			}
+			RecognitionConfig config = builder.build();
+
+			/*
+			 * if (needsParameters) { RecognitionConfig.AudioEncoding encoding =
+			 * SpeechToText.EncodingNameToEnum(audioEncoding); config =
+			 * RecognitionConfig.newBuilder().setEncoding(encoding).setSampleRateHertz(
+			 * sampleRateHertz) .setLanguageCode(languageCode).build(); } else { config =
+			 * RecognitionConfig.newBuilder().setLanguageCode(languageCode).build(); }
+			 */
 
 			// Performs speech recognition on the audio file
 			RecognizeResponse response = getSpeechClient().recognize(config, audio);

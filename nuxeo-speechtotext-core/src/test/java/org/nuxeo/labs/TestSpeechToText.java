@@ -72,7 +72,7 @@ public class TestSpeechToText {
         String transcript = speechToText.run(audioBlob, "en-US");
 
         assertNotNull(transcript);
-        assertTrue(transcript.indexOf("good morning Cleveland") > -1);
+        assertTrue(transcript.toLowerCase().indexOf("thanks for joining us") > -1);
 
     }
 
@@ -100,7 +100,7 @@ public class TestSpeechToText {
         assertNotNull(result);
         String description = (String) doc.getPropertyValue("dc:description");
         assertNotNull(description);
-        assertTrue(description.indexOf("good morning Cleveland") > -1);
+        assertTrue(description.toLowerCase().indexOf("thanks for joining us") > -1);
 
     }
 }
