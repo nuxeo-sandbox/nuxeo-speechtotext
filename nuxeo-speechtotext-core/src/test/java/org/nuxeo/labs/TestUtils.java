@@ -20,6 +20,7 @@ package org.nuxeo.labs;
 
 import java.io.File;
 
+import org.apache.commons.lang3.StringUtils;
 import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.runtime.api.Framework;
 
@@ -29,32 +30,50 @@ import org.nuxeo.runtime.api.Framework;
  */
 public class TestUtils {
 
-    // Relative to the test "resources" folder
-    public static final String CREDENTIAL_FILE_PATH = "credential.json";
+	// Relative to the test "resources" folder
+	public static final String CREDENTIAL_FILE_TEST_PATH = "credential.json";
 
-    protected static int credentialFileTest = -1;
+	protected static int credentialFileTest = -1;
 
-    /**
-     *
-     * @return true if the /credential.json file is available
-     * @since 10.2
-     */
-    public static boolean loadGoogleCredentials() {
+	/**
+	 *
+	 * @return true if the /credential.json file is available
+	 * @since 10.2
+	 */
+	public static boolean loadGoogleCredentials() {
 
-        File credentialsJson = null;
+		File credentialsJson = null;
 
-        if(credentialFileTest == -1) {
-            try {
-                credentialsJson = FileUtils.getResourceFileFromContext(CREDENTIAL_FILE_PATH);
-                // We are here => no error
-                Framework.getProperties().setProperty("google.credential.path", credentialsJson.getAbsolutePath());
-                credentialFileTest = 1;
-            } catch (Exception e) {
-                credentialFileTest = 0;
-            }
-        }
+		if (credentialFileTest == -1) {
+			credentialFileTest = 0;
+			try {
+				String credentialFilePath;
 
-        return credentialFileTest == 1;
-    }
+				// Check if set in nuxeo.conf (or equivalent) for the test
+				credentialFilePath = System.getProperty(SpeechToTextImpl.CREDENTIAL_PATH_PARAM);
+
+				// If not, check the specific env variable.
+				if (StringUtils.isBlank(credentialFilePath)) {
+					credentialFilePath = System.getenv(SpeechToTextImpl.CREDENTIAL_PATH_ENV_VAR);
+
+					// Still not there, try the local test file
+					if (StringUtils.isBlank(credentialFilePath)) {
+						credentialsJson = FileUtils.getResourceFileFromContext(CREDENTIAL_FILE_TEST_PATH);
+						// We are here => no error, there is a CREDENTIAL_FILE_PATH file
+						credentialFilePath = credentialsJson.getAbsolutePath();
+					}
+				}
+				if (StringUtils.isNotBlank(credentialFilePath)) {
+					Framework.getProperties().setProperty(SpeechToTextImpl.CREDENTIAL_PATH_PARAM, credentialFilePath);
+					credentialFileTest = 1;
+				}
+
+			} catch (Exception e) {
+				credentialFileTest = 0;
+			}
+		}
+
+		return credentialFileTest == 1;
+	}
 
 }

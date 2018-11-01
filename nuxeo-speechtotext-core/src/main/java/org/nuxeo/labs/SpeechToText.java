@@ -35,8 +35,8 @@ public interface SpeechToText {
 
     /**
      * Returns the transcript of the audio file.<br>
-     * This will always convert the input blob to FLAC before sending it to the cloud service, using the
-     * <code>AUDIO_TO_FLAC_CONVERTER</code> converter provided by the service<br>
+     * This will always convert the input blob to FLAC before sending it to the cloud service, possibly using the
+     * <code>AUDIO_TO_FLAC_CONVERTER</code> converter provided by the service (depends on the implementation)<br>
      *
      * @param Blob audio file, or at least a file that can be converted to audio
      * @param languageCode of the audio file
@@ -46,6 +46,7 @@ public interface SpeechToText {
 
     /**
      * Returns the transcript of the audio file.<br>
+     * The blob must be an audio, or at least a file compatible with the speech to text cloud service
      *
      * @param Blob audio file
      * @param audioEncoding of the audio file
