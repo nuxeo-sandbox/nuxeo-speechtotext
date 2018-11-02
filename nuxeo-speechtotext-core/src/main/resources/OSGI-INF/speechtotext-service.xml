@@ -4,6 +4,6 @@
   <implementation class="org.nuxeo.labs.SpeechToTextImpl" />
 
   <service>
-    <provide interface="org.nuxeo.labs.SpeechToText" />
+    <provide interface="org.nuxeo.labs.api.SpeechToText" />
   </service>
 </component>

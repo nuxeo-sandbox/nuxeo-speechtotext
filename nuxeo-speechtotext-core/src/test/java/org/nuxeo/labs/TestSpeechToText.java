@@ -23,6 +23,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
+import org.json.JSONArray;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.common.utils.FileUtils;
@@ -37,6 +38,9 @@ import org.nuxeo.ecm.core.api.impl.blob.FileBlob;
 import org.nuxeo.ecm.core.test.DefaultRepositoryInit;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
+import org.nuxeo.labs.api.SpeechToText;
+import org.nuxeo.labs.api.SpeechToTextOptions;
+import org.nuxeo.labs.api.SpeechToTextResponse;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
@@ -69,12 +73,39 @@ public class TestSpeechToText {
         Blob audioBlob = new FileBlob(audioFile);
 
         // Service will convert to flac
-        SpeechToTextResponse response = speechToText.run(audioBlob, "en-US");
+        SpeechToTextResponse response = speechToText.run(null, audioBlob, "en-US");
         assertNotNull(response);
         String transcript = response.getText();
 
         assertNotNull(transcript);
         assertTrue(transcript.toLowerCase().indexOf("thanks for joining us") > -1);
+
+    }
+
+    @Test
+    public void testWithWordTimeOffsets() throws Exception {
+
+        assumeTrue("Google credentials not found => no test", TestUtils.loadGoogleCredentials());
+
+        File audioFile = FileUtils.getResourceFileFromContext("output-weather.aac");
+        Blob audioBlob = new FileBlob(audioFile);
+
+        // Service will convert to flac
+        SpeechToTextResponse response = speechToText.run(new SpeechToTextOptions(false, true), audioBlob, "en-US");
+        assertNotNull(response);
+
+        JSONArray array = response.getWordTimeOffsets();
+        assertNotNull(array);
+        assertTrue(array.length() > 0);
+
+        // Result of cloud provider may change from time to time (getting more accurate for example), so we just search
+        // for words in a string instead of searching for an exact start/end for each
+        String arrayStr = array.toString().toLowerCase();
+        assertTrue(arrayStr.indexOf("\"word\":\"thanks\"") > -1);
+        assertTrue(arrayStr.indexOf("\"word\":\"for\"") > -1);
+        assertTrue(arrayStr.indexOf("\"word\":\"joining\"") > -1);
+        assertTrue(arrayStr.indexOf("\"word\":\"us\"") > -1);
+        
 
     }
 

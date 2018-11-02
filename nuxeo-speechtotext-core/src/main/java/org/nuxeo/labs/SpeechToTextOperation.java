@@ -27,6 +27,9 @@ import org.nuxeo.ecm.automation.core.annotations.Param;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
+import org.nuxeo.labs.api.SpeechToText;
+import org.nuxeo.labs.api.SpeechToTextOptions;
+import org.nuxeo.labs.api.SpeechToTextResponse;
 
 /**
  *
@@ -63,7 +66,8 @@ public class SpeechToTextOperation {
         Blob blob = (Blob) input.getPropertyValue(blobXpath);
 
         if (blob != null) {
-        	SpeechToTextResponse response = speechToText.run(blob, languageCode);;
+            SpeechToTextResponse response = speechToText.run(new SpeechToTextOptions(true, false), blob, languageCode);
+            ;
             transcript = response.getText();
         }
 

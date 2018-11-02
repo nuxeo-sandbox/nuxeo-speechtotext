@@ -17,7 +17,7 @@
  *     Eliot Kim
  *     Thibaud Arguillere
  */
-package org.nuxeo.labs;
+package org.nuxeo.labs.api;
 
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.NuxeoException;
@@ -38,23 +38,28 @@ public interface SpeechToText {
      * This will always convert the input blob to FLAC before sending it to the cloud service, possibly using the
      * <code>AUDIO_TO_FLAC_CONVERTER</code> converter provided by the service (depends on the implementation)<br>
      *
+     * @param options, the options when calling the service. If null, default options apply see
+     *            {@link SpeechToTextOptions}
      * @param Blob audio file, or at least a file that can be converted to audio
      * @param languageCode of the audio file
      * @return string of text
      */
-    SpeechToTextResponse run(Blob blob, String languageCode);
+    SpeechToTextResponse run(SpeechToTextOptions options, Blob blob, String languageCode);
 
     /**
      * Returns the transcript of the audio file.<br>
-     * The blob must be an audio, or at least a file compatible with the speech to text cloud service
-     *
+     * The blob must be an audio, or at least a file compatible with the speech to text cloud service *
+     * 
+     * @param options, the options when calling the service. If null, default options apply see
+     *            {@link SpeechToTextOptions}
      * @param Blob audio file
      * @param audioEncoding of the audio file
      * @param sampleRateHertz of the audio file
      * @param languageCode of the audio file
      * @return the response from the provider
      */
-    SpeechToTextResponse run(Blob blob, String audioEncoding, int sampleRateHertz, String languageCode);
+    SpeechToTextResponse run(SpeechToTextOptions options, Blob blob, String audioEncoding, int sampleRateHertz,
+            String languageCode);
 
     /**
      * Helper that returns the RecognitionConfig.AudioEncoding value for the name of the enum.<br>

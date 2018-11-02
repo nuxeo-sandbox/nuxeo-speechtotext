@@ -31,6 +31,9 @@ import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
 import org.nuxeo.ecm.core.api.blobholder.SimpleBlobHolder;
 import org.nuxeo.ecm.core.convert.api.ConversionService;
+import org.nuxeo.labs.api.SpeechToText;
+import org.nuxeo.labs.api.SpeechToTextOptions;
+import org.nuxeo.labs.api.SpeechToTextResponse;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.model.ComponentContext;
 import org.nuxeo.runtime.model.ComponentInstance;
@@ -43,169 +46,173 @@ import java.util.HashMap;
 
 /**
  * This is the implementation for Google Speech To text.
- *
  */
 public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
 
-	public static final String CREDENTIALS_PATH_PARAM = "google.speechtotext.credentials";
+    public static final String CREDENTIALS_PATH_PARAM = "google.speechtotext.credentials";
 
-	public static final String CREDENTIALS_PATH_ENV_VAR = "GOOGLE_SPEECHTOTEXT_CREDENTIALS";
+    public static final String CREDENTIALS_PATH_ENV_VAR = "GOOGLE_SPEECHTOTEXT_CREDENTIALS";
 
-	protected volatile SpeechClient speechClient = null;
+    protected volatile SpeechClient speechClient = null;
 
-	/**
-	 * Component activated notification. Called when the component is activated. All
-	 * component dependencies are resolved at that moment. Use this method to
-	 * initialize the component.
-	 *
-	 * @param context the component context.
-	 */
-	@Override
-	public void activate(ComponentContext context) {
-		super.activate(context);
-	}
+    /**
+     * Component activated notification. Called when the component is activated. All component dependencies are resolved
+     * at that moment. Use this method to initialize the component.
+     *
+     * @param context the component context.
+     */
+    @Override
+    public void activate(ComponentContext context) {
+        super.activate(context);
+    }
 
-	/**
-	 * Component deactivated notification. Called before a component is
-	 * unregistered. Use this method to do cleanup if any and free any resources
-	 * held by the component.
-	 *
-	 * @param context the component context.
-	 */
-	@Override
-	public void deactivate(ComponentContext context) {
-		super.deactivate(context);
-	}
+    /**
+     * Component deactivated notification. Called before a component is unregistered. Use this method to do cleanup if
+     * any and free any resources held by the component.
+     *
+     * @param context the component context.
+     */
+    @Override
+    public void deactivate(ComponentContext context) {
+        super.deactivate(context);
+    }
 
-	/**
-	 * Application started notification. Called after the application started. You
-	 * can do here any initialization that requires a working application (all
-	 * resolved bundles and components are active at that moment)
-	 *
-	 * @param context the component context. Use it to get the current bundle
-	 *                context
-	 * @throws Exception
-	 */
-	@Override
-	public void applicationStarted(ComponentContext context) {
-		// do nothing by default. You can remove this method if not used.
-	}
+    /**
+     * Application started notification. Called after the application started. You can do here any initialization that
+     * requires a working application (all resolved bundles and components are active at that moment)
+     *
+     * @param context the component context. Use it to get the current bundle context
+     * @throws Exception
+     */
+    @Override
+    public void applicationStarted(ComponentContext context) {
+        // do nothing by default. You can remove this method if not used.
+    }
 
-	@Override
-	public void registerContribution(Object contribution, String extensionPoint, ComponentInstance contributor) {
-		// Add some logic here to handle contributions
-	}
+    @Override
+    public void registerContribution(Object contribution, String extensionPoint, ComponentInstance contributor) {
+        // Add some logic here to handle contributions
+    }
 
-	@Override
-	public void unregisterContribution(Object contribution, String extensionPoint, ComponentInstance contributor) {
-		// Logic to do when unregistering any contribution
-	}
+    @Override
+    public void unregisterContribution(Object contribution, String extensionPoint, ComponentInstance contributor) {
+        // Logic to do when unregistering any contribution
+    }
 
-	protected SpeechClient getSpeechClient() {
+    protected SpeechClient getSpeechClient() {
 
-		if (speechClient == null) {
-			synchronized (this) {
-				if (speechClient == null) {
-					GoogleCredentials credentials = getCredentials();
-					try {
-						SpeechSettings speechSettings = SpeechSettings.newBuilder()
-								.setCredentialsProvider(FixedCredentialsProvider.create(credentials)).build();
-						speechClient = SpeechClient.create(speechSettings);
-					} catch (IOException e) {
-						throw new NuxeoException("Error getting the Speech-to-Text client", e);
-					}
-				}
-			}
-		}
+        if (speechClient == null) {
+            synchronized (this) {
+                if (speechClient == null) {
+                    GoogleCredentials credentials = getCredentials();
+                    try {
+                        SpeechSettings speechSettings = SpeechSettings.newBuilder()
+                                                                      .setCredentialsProvider(
+                                                                              FixedCredentialsProvider.create(
+                                                                                      credentials))
+                                                                      .build();
+                        speechClient = SpeechClient.create(speechSettings);
+                    } catch (IOException e) {
+                        throw new NuxeoException("Error getting the Speech-to-Text client", e);
+                    }
+                }
+            }
+        }
 
-		return speechClient;
-	}
+        return speechClient;
+    }
 
-	protected GoogleCredentials getCredentials() {
+    protected GoogleCredentials getCredentials() {
 
-		String credentialsFilePath = Framework.getProperty(CREDENTIALS_PATH_PARAM);
-		if (StringUtils.isBlank(credentialsFilePath)) {
-			credentialsFilePath = System.getenv(CREDENTIALS_PATH_ENV_VAR);
-		}
-		if (StringUtils.isBlank(credentialsFilePath)) {
-			throw new NuxeoException("Credentials file for Google SPeech To Text APi not found in nuxeo.conf ("
-					+ CREDENTIALS_PATH_PARAM + ") nor in an environement variable (" + CREDENTIALS_PATH_ENV_VAR + ")");
-		}
+        String credentialsFilePath = Framework.getProperty(CREDENTIALS_PATH_PARAM);
+        if (StringUtils.isBlank(credentialsFilePath)) {
+            credentialsFilePath = System.getenv(CREDENTIALS_PATH_ENV_VAR);
+        }
+        if (StringUtils.isBlank(credentialsFilePath)) {
+            throw new NuxeoException("Credentials file for Google SPeech To Text APi not found in nuxeo.conf ("
+                    + CREDENTIALS_PATH_PARAM + ") nor in an environement variable (" + CREDENTIALS_PATH_ENV_VAR + ")");
+        }
 
-		GoogleCredentials credentials = null;
-		try {
-			credentials = GoogleCredentials.fromStream(new FileInputStream(new File(credentialsFilePath)))
-					.createScoped(Lists.newArrayList("https://www.googleapis.com/auth/cloud-platform"));
-			return credentials;
-		} catch (IOException e) {
-			throw new NuxeoException("Error building Google Credentials", e);
-		}
+        GoogleCredentials credentials = null;
+        try {
+            credentials = GoogleCredentials.fromStream(new FileInputStream(new File(credentialsFilePath)))
+                                           .createScoped(Lists.newArrayList(
+                                                   "https://www.googleapis.com/auth/cloud-platform"));
+            return credentials;
+        } catch (IOException e) {
+            throw new NuxeoException("Error building Google Credentials", e);
+        }
 
-	}
+    }
 
-	@Override
-	public SpeechToTextResponse run(Blob blob, String languageCode) {
+    @Override
+    public SpeechToTextResponse run(SpeechToTextOptions options, Blob blob, String languageCode) {
 
-		Blob normalized = normalizeAudio(blob);
+        Blob normalized = normalizeAudio(blob);
 
-		return run(normalized, null, -1, languageCode);
-	}
+        return run(options, normalized, null, -1, languageCode);
+    }
 
-	@Override
-	public SpeechToTextResponse run(Blob blob, String audioEncoding, int sampleRateHertz, String languageCode) {
+    @Override
+    public SpeechToTextResponse run(SpeechToTextOptions options, Blob blob, String audioEncoding, int sampleRateHertz,
+            String languageCode) {
 
-		try {
+        try {
 
-			// Reads the audio file into memory
-			byte[] data = blob.getByteArray();
-			ByteString audioBytes = ByteString.copyFrom(data);
-			RecognitionAudio audio = RecognitionAudio.newBuilder().setContent(audioBytes).build();
+            if (options == null) {
+                options = SpeechToTextOptions.buildDefaultOptions();
+            }
 
-			/*
-			 * Google Cloud doc (2018-10-28): << You are not required to specify the
-			 * encoding and sample rate for WAV or FLAC files. If omitted, Speech-to-Text
-			 * automatically determines the encoding and sample rate for WAV or FLAC files
-			 * based on the file header. If you specify an encoding or sample rate value
-			 * that does not match the value in the file header, then Speech-to-Text returns
-			 * an error. >>
-			 */
-			String mimeType = blob.getMimeType();
-			boolean needsParameters = true;
-			if (StringUtils.isNotBlank(mimeType)) {
-				String mimeTypeLowerCase = mimeType.toLowerCase();
-				needsParameters = mimeTypeLowerCase.indexOf("flac") < 0 && mimeTypeLowerCase.indexOf("wav") < 0;
-			}
+            // Reads the audio file into memory
+            byte[] data = blob.getByteArray();
+            ByteString audioBytes = ByteString.copyFrom(data);
+            RecognitionAudio audio = RecognitionAudio.newBuilder().setContent(audioBytes).build();
 
-			RecognitionConfig.Builder builder;
-			// Shared parameters
-			builder = RecognitionConfig.newBuilder().setLanguageCode(languageCode).setEnableAutomaticPunctuation(true);
-			// Specific
-			if (needsParameters) {
-				RecognitionConfig.AudioEncoding encoding = SpeechToText.EncodingNameToEnum(audioEncoding);
-				builder = builder.setEncoding(encoding).setSampleRateHertz(sampleRateHertz);
-			}
-			RecognitionConfig config = builder.build();
+            /*
+             * Google Cloud doc (2018-10-28): << You are not required to specify the encoding and sample rate for WAV or
+             * FLAC files. If omitted, Speech-to-Text automatically determines the encoding and sample rate for WAV or
+             * FLAC files based on the file header. If you specify an encoding or sample rate value that does not match
+             * the value in the file header, then Speech-to-Text returns an error. >>
+             */
+            String mimeType = blob.getMimeType();
+            boolean needsParameters = true;
+            if (StringUtils.isNotBlank(mimeType)) {
+                String mimeTypeLowerCase = mimeType.toLowerCase();
+                needsParameters = mimeTypeLowerCase.indexOf("flac") < 0 && mimeTypeLowerCase.indexOf("wav") < 0;
+            }
 
-			// Performs speech recognition on the audio file
-			RecognizeResponse response = getSpeechClient().recognize(config, audio);
+            RecognitionConfig.Builder builder;
+            // Shared parameters
+            builder = RecognitionConfig.newBuilder().setLanguageCode(languageCode);
+            // Specific
+            builder = builder.setEnableAutomaticPunctuation(options.isWithPunctuation());
+            builder = builder.setEnableWordTimeOffsets(options.isWithWordTimeOffsets());
+            if (needsParameters) {
+                RecognitionConfig.AudioEncoding encoding = SpeechToText.EncodingNameToEnum(audioEncoding);
+                builder = builder.setEncoding(encoding).setSampleRateHertz(sampleRateHertz);
+            }
+            RecognitionConfig config = builder.build();
 
-			return new SpeechToTextGoogleResponse(response);
+            // Performs speech recognition on the audio file
+            RecognizeResponse response = getSpeechClient().recognize(config, audio);
 
-		} catch (IOException e) {
-			throw new NuxeoException("Error getting the Speech-to-Text result", e);
-		}
-	}
+            return new SpeechToTextGoogleResponse(response);
 
-	protected Blob normalizeAudio(Blob input) {
+        } catch (IOException e) {
+            throw new NuxeoException("Error getting the Speech-to-Text result", e);
+        }
+    }
 
-		ConversionService service = Framework.getService(ConversionService.class);
+    protected Blob normalizeAudio(Blob input) {
 
-		BlobHolder blobholder = new SimpleBlobHolder(input);
+        ConversionService service = Framework.getService(ConversionService.class);
 
-		BlobHolder result = service.convert(AUDIO_TO_FLAC_CONVERTER, blobholder, new HashMap<>());
+        BlobHolder blobholder = new SimpleBlobHolder(input);
 
-		return result.getBlob();
+        BlobHolder result = service.convert(AUDIO_TO_FLAC_CONVERTER, blobholder, new HashMap<>());
 
-	};
+        return result.getBlob();
+
+    };
 
 }
