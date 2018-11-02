@@ -33,33 +33,25 @@ public class SpeechToTextGoogleResponse implements SpeechToTextResponse {
 		this.response = response;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.nuxeo.labs.SpeechToTextResponse#getText()
+	/* 
+	 * In this implementation, we get the first result and its first alternative.
 	 */
 	@Override
 	public String getText() {
 
-		ArrayList<String> finalResult = new ArrayList<String>();
-
 		List<SpeechRecognitionResult> results = response.getResultsList();
 
-		for (SpeechRecognitionResult result : results) {
-			// There can be several alternative transcripts for a given chunk of speech.
-			// Just use the first (most likely) one here.
-			SpeechRecognitionAlternative alternative = result.getAlternativesList().get(0);
-			finalResult.add(alternative.getTranscript());
-		}
-
-		return finalResult.get(0);
+		// For this example, we just get the first result, which is the one with the
+		// higest relevance
+		SpeechRecognitionResult result = results.get(0);
+		// There can be several alternative transcripts for a given chunk of speech.
+		// Just use the
+		// first (most likely) one here.
+		SpeechRecognitionAlternative alternative = result.getAlternativesList().get(0);
+		
+		return alternative.getTranscript();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.nuxeo.labs.SpeechToTextResponse#getNativeResponse()
-	 */
 	@Override
 	public Object getNativeResponse() {
 		return response;

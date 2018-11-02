@@ -25,7 +25,9 @@ package org.nuxeo.labs;
 public interface SpeechToTextResponse {
 
 	/**
-	 * A quick way to get the text without other informations
+	 * A quick way to get the text without other informations.
+	 * <br/>
+	 * Return the most relevant transcript (§when a Cloud service may return alternatives)
 	 * 
 	 * @return the text of the transcript
 	 */
