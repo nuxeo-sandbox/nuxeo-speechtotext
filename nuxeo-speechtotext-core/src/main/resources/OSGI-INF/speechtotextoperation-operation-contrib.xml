@@ -2,7 +2,8 @@
 <component name="org.nuxeo.labs.operation.speechtotextoperation" version="1.0">
 
   <extension point="operations" target="org.nuxeo.ecm.core.operation.OperationServiceComponent">
-    <operation class="org.nuxeo.labs.SpeechToTextOperation" />
+    <operation class="org.nuxeo.labs.operations.SpeechToTextForDocument" />
+    <operation class="org.nuxeo.labs.operations.SpeechToTextForBlob" />
   </extension>
 
 </component>

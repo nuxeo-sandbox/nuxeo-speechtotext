@@ -17,8 +17,10 @@
  *     Eliot Kim
  *     Thibaud Arguillere
  */
-package org.nuxeo.labs;
+package org.nuxeo.labs.operations;
 
+import org.apache.commons.lang3.StringUtils;
+import org.nuxeo.ecm.automation.OperationContext;
 import org.nuxeo.ecm.automation.core.Constants;
 import org.nuxeo.ecm.automation.core.annotations.Context;
 import org.nuxeo.ecm.automation.core.annotations.Operation;
@@ -34,14 +36,18 @@ import org.nuxeo.labs.api.SpeechToTextResponse;
 /**
  *
  */
-@Operation(id = SpeechToTextOperation.ID, category = Constants.CAT_CONVERSION, label = "Speech to Text", description = "Send the blob found in blobXpath (default file:content) to SpeechToText, using the languageCode."
-        + " Return the transcript in the transcriptXpath field. Optionaly save the document (default false)")
-public class SpeechToTextOperation {
+@Operation(id = SpeechToTextForDocument.ID, category = Constants.CAT_CONVERSION, label = "Speech to Text", description = "Send the blob found in blobXpath (default file:content) to SpeechToText, using the languageCode."
+        + " Return the transcript in the transcriptXpath field. Optionaly save the document (default false)"
+        + " If resultVarName is not empty this context variable is set to the SpeechToTextResponse object which has more accessors")
+public class SpeechToTextForDocument {
 
     public static final String ID = "Convert.SpeechToTextOp";
 
     @Context
     protected CoreSession session;
+    
+    @Context
+    protected OperationContext ctx;
 
     @Context
     protected SpeechToText speechToText;
@@ -57,21 +63,28 @@ public class SpeechToTextOperation {
 
     @Param(name = "saveDocument", required = false, values = { "false" })
     protected boolean saveDocument = false;
+    
+    @Param(name = "resultVarName", required = false)
+    protected String resultVarName;
 
     @OperationMethod
     public DocumentModel run(DocumentModel input) {
 
         String transcript = null;
+        SpeechToTextResponse response = null;
 
         Blob blob = (Blob) input.getPropertyValue(blobXpath);
 
         if (blob != null) {
-            SpeechToTextResponse response = speechToText.run(new SpeechToTextOptions(true, false), blob, languageCode);
-            ;
+            response = speechToText.run(new SpeechToTextOptions(true, false), blob, languageCode);
             transcript = response.getText();
         }
 
         input.setPropertyValue(transcriptXpath, transcript);
+        
+        if (StringUtils.isBlank(resultVarName)) {
+            ctx.put(resultVarName, response);
+        }
 
         if (saveDocument) {
             input = session.saveDocument(input);

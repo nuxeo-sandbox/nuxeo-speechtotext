@@ -41,6 +41,7 @@ import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.labs.api.SpeechToText;
 import org.nuxeo.labs.api.SpeechToTextOptions;
 import org.nuxeo.labs.api.SpeechToTextResponse;
+import org.nuxeo.labs.operations.SpeechToTextForDocument;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
@@ -126,7 +127,7 @@ public class TestSpeechToText {
         OperationChain chain = new OperationChain("testDocumentOperation");
         // Let default values for blobXpath and saveDocument
         ctx.setInput(doc);
-        chain.add(SpeechToTextOperation.ID).set("transcriptXpath", "dc:description").set("languageCode", "en-US");
+        chain.add(SpeechToTextForDocument.ID).set("transcriptXpath", "dc:description").set("languageCode", "en-US");
 
         DocumentModel result = (DocumentModel) automationService.run(ctx, chain);
 
