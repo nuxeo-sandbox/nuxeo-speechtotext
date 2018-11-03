@@ -1,15 +1,41 @@
 # nuxeo-speechtotext
 
+QA status<br/>
+[![Build Status](https://qa.nuxeo.org/jenkins/buildStatus/icon?job=Sandbox/sandbox_nuxeo-speechtotext-master)](https://qa.nuxeo.org/jenkins/view/Sandbox/job/Sandbox/job/sandbox_nuxeo-speechtotext-master/)
+
 This plug-in uses [Google Cloud Speech-to-Text](https://cloud.google.com/speech-to-text/) to render an audio file to text
 
 **This is Work in Progress**
 
 ## Important
-1. Please, read the *Support* part, below.2. The plugin is _an example_, showing how to connect to a Google Cloud service not meant to be used with audio files lasting dozens of minutes or more.3. So, there are known limitations:
+1. Please, read the *Support* part, below.
+2. The plugin is _an example_, showing how to connect to a Google Cloud service not meant to be used with audio files lasting dozens of minutes or more.
+3. So, there are known limitations:
   * The call is _synchronous_
   * For audio files of maximum 60 seconds
     * If the file is too big or too long Google returns an error: "Sync input too long. For audio longer than 1 min use LongRunningRecognize with a 'uri' parameter."
-  * Please, read Google's [best practices for Speech to Text API](https://cloud.google.com/speech-to-text/docs/best-practices) to check what is supported. For example, mp3 files are not supported and must be converted, ideally to FLAC.### Warning: Using Google _beta_  version of Speech to Text* In this implementation, the plugin uses Google Speech to Text API _in its BETA VERSION_ (see the pom.xml file for the exact version number).* Google makes it clear that some API may change their billing process, for example, the access to a punctuated text. See the [quota](https://cloud.google.com/speech-to-text/quotas) documentation.## Authentication to Google Cloud ServiceAs of today, only _Service Accounts_  are supported (not API Keys) by the Google Java SDK. To set up the credentials, the plugin looks:1. First for a `google.speechtotext.credentials` parameter in `nuxeo.conf`2. If not found there, it checks for an environment variable named `GOOGLE_SPEECHTOTEXT_CREDENTIALS`For unit testing only, if not found in both places above, it looks for a file named `credentials.json`, located in the `resources` folder in the `test` folder. This file is ignored by git, so is not pushed to the repository but **we strongly advise in using an environment variable for unit tests**.## UsagePlease, read Google's [best practices for Speech to Text API](https://cloud.google.com/speech-to-text/docs/best-practices) (For example, mp3 files are not supported and must be converted, ideally to FLAC)The plugin exposes API allowing to:* Automatically convert to FLAC (the plugin contributes a `commandLine base converter`) before sending the audio file to the service* _Or_ the caller can specify the encoding and rate Hz of the input file (no conversion performed by the plugin)
+  * Please, read Google's [best practices for Speech to Text API](https://cloud.google.com/speech-to-text/docs/best-practices) to check what is supported. For example, mp3 files are not supported and must be converted, ideally to FLAC.
+
+### Warning: Using Google _beta_  version of Speech to Text
+* In this implementation, the plugin uses Google Speech to Text API _in its BETA VERSION_ (see the pom.xml file for the exact version number).
+* Google makes it clear that some API may change their billing process, for example, the access to a punctuated text. See the [quota](https://cloud.google.com/speech-to-text/quotas) documentation.
+
+## Authentication to Google Cloud Service
+As of today, only _Service Accounts_  are supported (not API Keys) by the Google Java SDK. To set up the credentials, the plugin looks:
+
+1. First for a `google.speechtotext.credentials` parameter in `nuxeo.conf`
+2. If not found there, it checks for an environment variable named `GOOGLE_SPEECHTOTEXT_CREDENTIALS`
+
+For unit testing only, if not found in both places above, it looks for a file named `credentials.json`, located in the `resources` folder in the `test` folder. This file is ignored by git, so is not pushed to the repository but **we strongly advise in using an environment variable for unit tests**.
+
+## Usage
+
+Please, read Google's [best practices for Speech to Text API](https://cloud.google.com/speech-to-text/docs/best-practices) (For example, mp3 files are not supported and must be converted, ideally to FLAC)
+
+The plugin exposes API allowing to:
+
+* Automatically convert to FLAC (the plugin contributes a `commandLine base converter`) before sending the audio file to the service
+* _Or_ the caller can specify the encoding and rate Hz of the input file (no conversion performed by the plugin)
 
 The plugin does not automatically convert `Audio` (or `Video`) files to text. You will add listeners, buttons... that will call one of the following operations:
 
