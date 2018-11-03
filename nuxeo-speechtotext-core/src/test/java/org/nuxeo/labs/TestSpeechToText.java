@@ -92,7 +92,8 @@ public class TestSpeechToText {
         Blob audioBlob = new FileBlob(audioFile);
 
         // Service will convert to flac
-        SpeechToTextResponse response = speechToText.run(new SpeechToTextOptions(false, true), audioBlob, "en-US");
+        SpeechToTextOptions options = new SpeechToTextOptions(false, true);
+        SpeechToTextResponse response = speechToText.run(options, audioBlob, "en-US");
         assertNotNull(response);
 
         JSONArray array = response.getWordTimeOffsets();
@@ -106,7 +107,6 @@ public class TestSpeechToText {
         assertTrue(arrayStr.indexOf("\"word\":\"for\"") > -1);
         assertTrue(arrayStr.indexOf("\"word\":\"joining\"") > -1);
         assertTrue(arrayStr.indexOf("\"word\":\"us\"") > -1);
-        
 
     }
 
