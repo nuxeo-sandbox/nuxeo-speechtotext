@@ -5,7 +5,6 @@ QA status<br/>
 
 This plug-in uses [Google Cloud Speech-to-Text](https://cloud.google.com/speech-to-text/) to render an audio file to text
 
-**This is Work in Progress**
 
 ## Important
 1. Please, read the *Support* part, below.
@@ -16,9 +15,22 @@ This plug-in uses [Google Cloud Speech-to-Text](https://cloud.google.com/speech-
     * If the file is too big or too long Google returns an error: "Sync input too long. For audio longer than 1 min use LongRunningRecognize with a 'uri' parameter."
   * Please, read Google's [best practices for Speech to Text API](https://cloud.google.com/speech-to-text/docs/best-practices) to check what is supported. For example, mp3 files are not supported and must be converted, ideally to FLAC.
 
-### Warning: Using Google _beta_  version of Speech to Text
+### WARNING #1: Using Google _beta_  version of Speech to Text
 * In this implementation, the plugin uses Google Speech to Text API _in its BETA VERSION_ (see the pom.xml file for the exact version number).
 * Google makes it clear that some API may change their billing process, for example, the access to a punctuated text. See the [quota](https://cloud.google.com/speech-to-text/quotas) documentation.
+
+<hr>
+## WARNING #2: Goggle Guava version and Nuxeo 10.2
+The Google Java API used by the plugin requires `guava` (Google set of Java utilities) version 21.0 minimum. Nuxeo 10.2 deploys version 18.0: The marketplace package forces the installation of `guava-21.0.jar` (in /{nuxeo-home}/nxserver/lib/) and it _replaces_ the default one (`guava-18.0.jar`). So far, in our testing (not only unit testing, but also testing on a deployed Nuxeo server, etc.) we have not seen any issue, but by essence, this kind of testing is limited.
+
+So, if something goes wrong, check `server.log` to see if it is cause by Google Guava.
+
+**THIS VERSION OF THE PLUGIN IS FOR NUXEO 10.2 ONLY**. Create a branch and test/adapt if you are using another version.
+
+Notice that the problem is solved in the coming 10.3 (~December 2018), which uses version 26.0. So **when 10.3 is released, the package must also be updated** to change the guava version in the pom (and it it is named `guava-{version}-jre.jar` and not `guava-{version}.jar`)
+
+In case of problem with 10.2, it is likely that the fix will be to rewrote the plugin and use only the REST API. WHich probably is not worth it: 10.3 is scheduled very soon (in a month) at the time this README is written.
+<hr>
 
 ## Authentication to Google Cloud Service
 As of today, only _Service Accounts_  are supported (not API Keys) by the Google Java SDK. To set up the credentials, the plugin looks:
