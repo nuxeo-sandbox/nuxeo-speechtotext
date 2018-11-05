@@ -66,6 +66,10 @@
           <artifact groupId="org.nuxeo.labs*"/>
         </excludes>
       </artifact:set>
+      <!-- FORCE INSTALLATION OF GUAVA 21.0 -->
+      <!-- This is not good, must think about removing this when upgrading to Nuxeo >= 10.3 -->
+      <!-- Minimum has been done: Info in README. Hope it's useful... -->
+      <artifact:resolveFile key="com.google.guava:guava:21.0" />
     </copy>
     <nx:rmdups dir="${outdir}/nxr/lib"/>
     <!-- Temporary ZIP Nuxeo NXR to compare with base distribution NXR -->

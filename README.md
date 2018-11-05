@@ -21,7 +21,7 @@ This plug-in uses [Google Cloud Speech-to-Text](https://cloud.google.com/speech-
 
 <hr>
 ## WARNING #2: Goggle Guava version and Nuxeo 10.2
-The Google Java API used by the plugin requires `guava` (Google set of Java utilities) version 21.0 minimum. Nuxeo 10.2 deploys version 18.0: The marketplace package forces the installation of `guava-21.0.jar` (in /{nuxeo-home}/nxserver/lib/) and it _replaces_ the default one (`guava-18.0.jar`). So far, in our testing (not only unit testing, but also testing on a deployed Nuxeo server, etc.) we have not seen any issue, but by essence, this kind of testing is limited.
+The Google Java API used by the plugin requires `guava` (Google set of Java utilities) version 21.0 minimum. Nuxeo 10.2 deploys version 18.0: **The marketplace package forces the installation of `guava-21.0.jar`** (in /{nuxeo-home}/nxserver/lib/) and it _replaces_ the default one (`guava-18.0.jar`). So far, in our testing (not only unit testing, but also testing on a deployed Nuxeo server, etc.) we have not seen any issue, but by essence, this kind of testing is limited.
 
 So, if something goes wrong, check `server.log` to see if it is cause by Google Guava.
 
