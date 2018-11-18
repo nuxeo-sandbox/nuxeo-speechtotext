@@ -5,7 +5,7 @@
     target="org.nuxeo.ecm.platform.commandline.executor.service.CommandLineExecutorComponent">
     <command enabled="true" name="ffmpeg-audio-to-flac">
       <commandLine>ffmpeg</commandLine>
-      <parameterString> -i #{sourceFilePath} -ac 1 -vn -acodec flac -f flac #{targetFilePath}
+      <parameterString> -i #{sourceFilePath} -ac 1 -vn -acodec flac -f flac -ar 16000 #{targetFilePath}
       </parameterString>
       <installationDirective>You need to install ffmpeg from http://ffmpeg.org (apt-get install ffmpeg)
       </installationDirective>
