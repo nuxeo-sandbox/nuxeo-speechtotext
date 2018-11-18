@@ -26,6 +26,16 @@ import com.google.cloud.speech.v1.*;
 import com.google.protobuf.ByteString;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.BufferedHttpEntity;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
@@ -42,6 +52,8 @@ import org.nuxeo.runtime.model.DefaultComponent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 
 /**
@@ -158,6 +170,10 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
             String languageCode) {
 
         try {
+            
+            if(languageCode != null) {
+            //return runWithREST(options, blob, audioEncoding, sampleRateHertz, languageCode);
+            }
 
             if (options == null) {
                 options = SpeechToTextOptions.buildDefaultOptions();
@@ -213,6 +229,71 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
 
         return result.getBlob();
 
-    };
+    }
+
+    public SpeechToTextResponse runWithREST(SpeechToTextOptions options, Blob blob, String audioEncoding,
+            int sampleRateHertz, String languageCode) {
+
+        SpeechToTextResponse response = null;
+
+        if (options == null) {
+            options = SpeechToTextOptions.buildDefaultOptions();
+        }
+        
+        CloseableHttpClient client = HttpClients.createDefault();
+
+        try {
+
+            // Convert audio to Base64 String
+            byte[] data = blob.getByteArray();
+            String audioStr = Base64.getEncoder().encodeToString(data);
+
+            JSONObject jsonBody = new JSONObject();
+            
+            JSONObject audioJson = new JSONObject();
+            audioJson.put("content", audioStr);
+            jsonBody.put("audio", audioJson);
+
+            /*
+             * "config": { "encoding":"FLAC", "sampleRateHertz": 16000, "languageCode": "en-US",
+             * "enableAutomaticPunctuation": true, "enableWordTimeOffsets": false },
+             */
+
+            JSONObject config = new JSONObject();
+            config.put("languageCode", languageCode);
+            config.put("enableAutomaticPunctuation", options.isWithPunctuation());
+            config.put("enableWordTimeOffsets", options.isWithWordTimeOffsets());
+            jsonBody.put("config", config);
+            
+            String bodyJsonStr = jsonBody.toString();
+
+            String apiKey = System.getenv("GOOGLE_SPEECHTOTEXT_APIKEY");
+            String url = "https://speech.googleapis.com/v1/speech:recognize?key=" + apiKey;
+            HttpPost httpPost = new HttpPost(url);
+            
+            StringEntity bodyEntity = new StringEntity(bodyJsonStr);
+            httpPost.setEntity(bodyEntity);
+            httpPost.setHeader("Accept", "application/json");
+            httpPost.setHeader("Content-type", "application/json");
+            CloseableHttpResponse httpResponse = client.execute(httpPost);
+            
+            int httpResponsecode = httpResponse.getStatusLine().getStatusCode();
+            HttpEntity responseEntity = httpResponse.getEntity();
+            BufferedHttpEntity buf = new BufferedHttpEntity(responseEntity);
+            String responseContent = EntityUtils.toString(buf, StandardCharsets.UTF_8);
+            System.out.println("\n" + responseContent + "\n");
+            
+        } catch (Exception e) {
+
+        } finally {
+            try {
+                client.close();
+            } catch (IOException e) {
+                // Ignore;
+            }
+        }
+
+        return response;
+    }
 
 }
