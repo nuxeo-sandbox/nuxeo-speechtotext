@@ -21,6 +21,7 @@ package org.nuxeo.labs;
 import com.google.inject.Inject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
 import org.nuxeo.ecm.core.api.blobholder.SimpleBlobHolder;
@@ -48,9 +49,10 @@ public class TestConverter {
 
     @Test
     public void testConverter() {
-        BlobHolder input = new SimpleBlobHolder(
-                new FileBlob(new File(getClass().getResource("/output-weather.aac").getPath())));
-        assertNotNull(input);
+        
+        File audioFile = FileUtils.getResourceFileFromContext("test-audio.aac");
+        Blob audioBlob = new FileBlob(audioFile);
+        BlobHolder input = new SimpleBlobHolder(audioBlob);
         BlobHolder result = service.convert(SpeechToText.AUDIO_TO_FLAC_CONVERTER, input, new HashMap<>());
         assertNotNull(result);
 

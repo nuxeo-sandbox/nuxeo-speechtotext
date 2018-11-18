@@ -70,7 +70,7 @@ public class TestSpeechToText {
 
         assumeTrue("Google credentials not found => no test", TestUtils.loadGoogleCredentials());
 
-        File audioFile = FileUtils.getResourceFileFromContext("output-weather.aac");
+        File audioFile = FileUtils.getResourceFileFromContext("test-audio.aac");
         Blob audioBlob = new FileBlob(audioFile);
 
         // Service will convert to flac
@@ -79,7 +79,7 @@ public class TestSpeechToText {
         String transcript = response.getText();
 
         assertNotNull(transcript);
-        assertTrue(transcript.toLowerCase().indexOf("thanks for joining us") > -1);
+        assertTrue(transcript.toLowerCase().indexOf("this is john") > -1);
 
     }
 
@@ -88,7 +88,7 @@ public class TestSpeechToText {
 
         assumeTrue("Google credentials not found => no test", TestUtils.loadGoogleCredentials());
 
-        File audioFile = FileUtils.getResourceFileFromContext("output-weather.aac");
+        File audioFile = FileUtils.getResourceFileFromContext("test-audio.aac");
         Blob audioBlob = new FileBlob(audioFile);
 
         // Service will convert to flac
@@ -103,10 +103,11 @@ public class TestSpeechToText {
         // Result of cloud provider may change from time to time (getting more accurate for example), so we just search
         // for words in a string instead of searching for an exact start/end for each
         String arrayStr = array.toString().toLowerCase();
-        assertTrue(arrayStr.indexOf("\"word\":\"thanks\"") > -1);
-        assertTrue(arrayStr.indexOf("\"word\":\"for\"") > -1);
-        assertTrue(arrayStr.indexOf("\"word\":\"joining\"") > -1);
-        assertTrue(arrayStr.indexOf("\"word\":\"us\"") > -1);
+        assertTrue(arrayStr.indexOf("\"word\":\"this\"") > -1);
+        assertTrue(arrayStr.indexOf("\"word\":\"is\"") > -1);
+        assertTrue(arrayStr.indexOf("\"word\":\"john\"") > -1);
+        assertTrue(arrayStr.indexOf("\"word\":\"test\"") > -1);
+        assertTrue(arrayStr.indexOf("\"word\":\"french\"") > -1);
 
     }
 
@@ -117,7 +118,7 @@ public class TestSpeechToText {
 
         DocumentModel doc = coreSession.createDocumentModel("/", "myFile", "File");
         doc.setPropertyValue("dc:title", "myFile");
-        File audioFile = FileUtils.getResourceFileFromContext("output-weather.aac");
+        File audioFile = FileUtils.getResourceFileFromContext("test-audio.aac");
         doc.setPropertyValue("file:content", new FileBlob(audioFile));
 
         doc = coreSession.createDocument(doc);
@@ -134,7 +135,7 @@ public class TestSpeechToText {
         assertNotNull(result);
         String description = (String) doc.getPropertyValue("dc:description");
         assertNotNull(description);
-        assertTrue(description.toLowerCase().indexOf("thanks for joining us") > -1);
+        assertTrue(description.toLowerCase().indexOf("this is john") > -1);
 
     }
 }
