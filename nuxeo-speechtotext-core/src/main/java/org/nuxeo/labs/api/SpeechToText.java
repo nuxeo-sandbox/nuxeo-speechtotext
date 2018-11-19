@@ -31,8 +31,10 @@ public interface SpeechToText {
 
     /**
      * Returns the transcript of the audio file.<br>
-     * This will always convert the input blob to FLAC before sending it to the cloud service, possibly using the
+     * This will convert the input blob to FLAC before sending it to the cloud service, possibly using the
      * <code>AUDIO_TO_FLAC_CONVERTER</code> converter provided by the service (depends on the implementation)<br>
+     * This automatic conversion is performed only if needed (when using Google, if the audio is flac or wav, no
+     * conversion is needed)
      *
      * @param options, the options when calling the service. If null, default options apply see
      *            {@link SpeechToTextOptions}

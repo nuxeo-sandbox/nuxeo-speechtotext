@@ -127,16 +127,33 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
     @Override
     public SpeechToTextResponse run(SpeechToTextOptions options, Blob blob, String audioEncoding, int sampleRateHertz,
             String languageCode) {
-        
+
         return runWithREST(options, blob, audioEncoding, sampleRateHertz, languageCode);
-        
+
     }
 
-    protected Blob normalizeAudio(Blob input) {
+    protected boolean isFlacOrWav(Blob blob) {
+
+        String mimeType = blob.getMimeType();
+        if (StringUtils.isNotBlank(mimeType)) {
+            String mimeTypeLowerCase = mimeType.toLowerCase();
+            if (mimeTypeLowerCase.indexOf("flac") > -1 || mimeTypeLowerCase.indexOf("wav") > -1) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    protected Blob normalizeAudio(Blob blob) {
+
+        if (isFlacOrWav(blob)) {
+            return blob;
+        }
 
         ConversionService service = Framework.getService(ConversionService.class);
 
-        BlobHolder blobholder = new SimpleBlobHolder(input);
+        BlobHolder blobholder = new SimpleBlobHolder(blob);
 
         BlobHolder result = service.convert(AUDIO_TO_FLAC_CONVERTER, blobholder, new HashMap<>());
 
@@ -180,13 +197,9 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
              * FLAC files based on the file header. If you specify an encoding or sample rate value that does not match
              * the value in the file header, then Speech-to-Text returns an error. >>
              */
-            String mimeType = blob.getMimeType();
-            if (StringUtils.isNotBlank(mimeType)) {
-                String mimeTypeLowerCase = mimeType.toLowerCase();
-                if (mimeTypeLowerCase.indexOf("flac") < 0 && mimeTypeLowerCase.indexOf("wav") < 0) {
-                    config.put("encoding", audioEncoding);
-                    config.put("sampleRateHertz", sampleRateHertz);
-                }
+            if (isFlacOrWav(blob)) {
+                config.put("encoding", audioEncoding);
+                config.put("sampleRateHertz", sampleRateHertz);
             }
             jsonBody.put("config", config);
 
@@ -200,12 +213,14 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
             httpPost.setEntity(bodyEntity);
             httpPost.setHeader("Accept", "application/json");
             httpPost.setHeader("Content-type", "application/json");
+
             CloseableHttpResponse httpResponse = client.execute(httpPost);
 
             // ===================================> Get the result
             int httpResponsecode = httpResponse.getStatusLine().getStatusCode();
             if (httpResponsecode != 200) {
-                throw new NuxeoException("Problem calling teh service, Status code: " + httpResponsecode);
+                throw new NuxeoException("Problem calling the service, Status code: " + httpResponsecode + ", "
+                        + httpResponse.getStatusLine().getReasonPhrase());
             } else {
                 HttpEntity responseEntity = httpResponse.getEntity();
                 BufferedHttpEntity buf = new BufferedHttpEntity(responseEntity);
@@ -214,7 +229,7 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
             }
 
         } catch (IOException | JSONException e) {
-            throw new NuxeoException("Error getting the speech-to-text", e);
+            throw new NuxeoException("Error getting the speech-to-text result.", e);
         } finally {
             try {
                 client.close();

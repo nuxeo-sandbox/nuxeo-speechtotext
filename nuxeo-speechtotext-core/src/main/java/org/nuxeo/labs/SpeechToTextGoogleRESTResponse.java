@@ -32,7 +32,7 @@ import org.nuxeo.labs.api.SpeechToTextResponse;
  * API V1, the result is a JSON Object as string.
  * <p>
  * See <code>com.google.protobuf.Duration</code> for word infos. Basically,n the result is expressed in a string, milli
- * and nano seconds being the fractional part. In this implementation, we just keep the seconds with max 2 digits (lik:
+ * and nano seconds being the fractional part. In this implementation, we just keep the seconds with max 3 digits (like:
  * "5.050006765s" => 5.05)
  * 
  * <pre>
@@ -61,6 +61,9 @@ import org.nuxeo.labs.api.SpeechToTextResponse;
  * </pre>
  * 
  * Google doc says there is always at least one alternative.
+ * <p>
+ * If an error occured during the call, the response object contains the error in the "transcript" field for first
+ * alternative.
  * 
  * @since 10.2
  */
@@ -76,6 +79,19 @@ public class SpeechToTextGoogleRESTResponse implements SpeechToTextResponse {
         }
     }
 
+    /*
+     * {
+     *   "results": [
+     *     "alternatives": [
+     *       {
+     *         "transcript": "AN ERROR OCCURED: ...",
+     *         "confidence": 0,
+     *         "words": []
+     *       }
+     *     ]
+     *   ]
+     * }
+     */
     protected void buildErrorResponse(Exception exception) throws JSONException {
 
         jsonResponse = new JSONObject();
@@ -116,18 +132,16 @@ public class SpeechToTextGoogleRESTResponse implements SpeechToTextResponse {
         if (StringUtils.isNotBlank(secondsStr)) {
             // Remove the final "s"
             int pos = secondsStr.indexOf("s");
-            if(pos >-1) {
+            if (pos > -1) {
                 secondsStr = secondsStr.substring(0, pos);
             }
 
             pos = secondsStr.indexOf(".");
-            if(pos > -1 && secondsStr.length() > (pos + 3)) {
-                secondsStr = secondsStr.substring(0, pos + 3);
+            if (pos > -1 && secondsStr.length() > (pos + 4)) {
+                secondsStr = secondsStr.substring(0, pos + 4);
             }
-            
+
             result = Double.parseDouble(secondsStr);
-            
-            return Double.parseDouble(secondsStr);
         }
 
         return result;
@@ -150,6 +164,9 @@ public class SpeechToTextGoogleRESTResponse implements SpeechToTextResponse {
         return text;
     }
 
+    /*
+     * Here, we convert to a JSON Array with Double values instead of String for the offsets.
+     */
     @Override
     public JSONArray getWordTimeOffsets() throws JSONException {
 

@@ -34,12 +34,12 @@ import org.nuxeo.labs.api.SpeechToTextResponse;
 /**
  *
  */
-@Operation(id = SpeechToTextForBlob.ID, category = Constants.CAT_CONVERSION, label = "Blob: Speech to Text", description = "Send the inoput blob to the SpeechToText service, using the languageCode."
-        + " The resultVarName context variable is set to the SpeechToTextResponse object which has more accessors."
-        + " If the blob is a FLAC audio file, audioEncoding and sampleRateHertz are optional and can be ommited."
-        + " If passed, audioEncoding must be a valid value of RecognitionConfig.AudioEncoding (LINEAR16, FLAC, MULAW ..."
+@Operation(id = SpeechToTextForBlob.ID, category = Constants.CAT_CONVERSION, label = "Blob: Speech to Text", description = "Send the input blob to the SpeechToText service, using the languageCode."
+        + " If the blob is a FLAC or a WAV audio file, audioEncoding and sampleRateHertz are optional and can be ommited."
+        + " If passed, audioEncoding must be a valid value, case sensitive (LINEAR16, FLAC, MULAW ..."
         + " Misc. options can be set (punctuation, wordTimeOffsets.)"
-        + " The operaiton returns the input blob unchanged")
+        + " The resultVarName context variable is set to the SpeechToTextResponse object with the transcript, word time offsets ..."
+        + " The operation returns the input blob unchanged")
 public class SpeechToTextForBlob {
 
     public static final String ID = "Convert.SpeechToTextForBlob";
@@ -62,10 +62,10 @@ public class SpeechToTextForBlob {
     @Param(name = "sampleRateHertz", required = false)
     protected int sampleRateHertz;
 
-    @Param(name = "withPunctuation", required = false)
-    protected boolean withPunctuation = false;
+    @Param(name = "withPunctuation", required = false, values = { "true" })
+    protected boolean withPunctuation = true;
 
-    @Param(name = "withWordTimeOffets", required = false)
+    @Param(name = "withWordTimeOffets", required = false, values = { "false" })
     protected boolean withWordTimeOffets = false;
 
     @Param(name = "resultVarName", required = true)

@@ -36,12 +36,15 @@ import org.nuxeo.labs.api.SpeechToTextResponse;
 /**
  *
  */
-@Operation(id = SpeechToTextForDocument.ID, category = Constants.CAT_CONVERSION, label = "Speech to Text", description = "Send the blob found in blobXpath (default file:content) to SpeechToText, using the languageCode."
+@Operation(id = SpeechToTextForDocument.ID, category = Constants.CAT_CONVERSION, label = "Document: Speech to Text", description = "Send the blob found in blobXpath (default file:content) to SpeechToText, using the languageCode."
         + " Return the transcript in the transcriptXpath field. Optionaly save the document (default false)"
-        + " If resultVarName is not empty this context variable is set to the SpeechToTextResponse object which has more accessors")
+        + " If the blob is not a FLAC or a WAV audio, a conversion will be sent to the service."
+        + " Misc. options can be set (punctuation, wordTimeOffsets.)"
+        + " If resultVarName is not empty this context variable is set to the SpeechToTextResponse object which has more accessors"
+        + " like accessing the worg time offsets")
 public class SpeechToTextForDocument {
 
-    public static final String ID = "Convert.SpeechToTextOp";
+    public static final String ID = "Convert.SpeechToTextForDocument";
 
     @Context
     protected CoreSession session;
