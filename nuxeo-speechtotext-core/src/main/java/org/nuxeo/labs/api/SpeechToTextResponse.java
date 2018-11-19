@@ -38,8 +38,8 @@ public interface SpeechToTextResponse {
      * Returns a JSON array of the words found in most relevant transcript (when a Cloud service may return
      * alternatives). The array contains JSONObject with the following fields:<BR>
      * "word": The word<BR>
-     * "start": The start time for the word, in seconds <BR>
-     * "end": The end time for the word, in seconds
+     * "start": Number, the start time for the word, in seconds <BR>
+     * "end": Number, the end time for the word, in seconds
      * 
      * @return the JSONArray of the words and their offset
      */
