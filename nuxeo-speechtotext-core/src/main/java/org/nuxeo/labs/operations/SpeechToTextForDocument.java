@@ -61,6 +61,12 @@ public class SpeechToTextForDocument {
     @Param(name = "languageCode", required = true, values = { "en-US" })
     protected String languageCode = "en-US";
 
+    @Param(name = "withPunctuation", required = false, values = { "true" })
+    protected boolean withPunctuation = true;
+
+    @Param(name = "withWordTimeOffets", required = false, values = { "false" })
+    protected boolean withWordTimeOffets = false;
+
     @Param(name = "saveDocument", required = false, values = { "false" })
     protected boolean saveDocument = false;
     
@@ -76,7 +82,7 @@ public class SpeechToTextForDocument {
         Blob blob = (Blob) input.getPropertyValue(blobXpath);
 
         if (blob != null) {
-            response = speechToText.run(new SpeechToTextOptions(true, false), blob, languageCode);
+            response = speechToText.run(new SpeechToTextOptions(withPunctuation, withWordTimeOffets), blob, languageCode);
             transcript = response.getText();
         }
 
