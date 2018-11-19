@@ -24,7 +24,7 @@ import org.nuxeo.ecm.core.api.Blob;
 public interface SpeechToText {
 
     /*
-     * Convert and audio file fo FLAC. If the file is a video, extracts the audio to FLAC. (See the command line XML
+     * Convert and audio file to FLAC. If the file is a video, extracts the audio to FLAC. (See the command line XML
      * contribution)
      */
     public static final String AUDIO_TO_FLAC_CONVERTER = "audio-to-flac";
