@@ -88,7 +88,7 @@ public class SpeechToTextForDocument {
 
         input.setPropertyValue(transcriptXpath, transcript);
         
-        if (StringUtils.isBlank(resultVarName)) {
+        if (StringUtils.isNotBlank(resultVarName)) {
             ctx.put(resultVarName, response);
         }
 
