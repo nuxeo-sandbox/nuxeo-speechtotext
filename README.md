@@ -16,7 +16,7 @@ This plug-in uses [Google Cloud Speech-to-Text](https://cloud.google.com/speech-
   * Please, read Google's [best practices for Speech to Text API](https://cloud.google.com/speech-to-text/docs/best-practices) to check what is supported. For example, mp3 files are not supported and must be converted, ideally to FLAC.
 
 ### WARNING: Using Google _beta_  version of Speech to Text
-* In this implementation, the plugin uses Google Speech to Text API _in its BETA VERSION_ (see the pom.xml file for the exact version number).
+* In this implementation, the plugin uses Google Speech to Text API _in its BETA VERSION_.
 * Google makes it clear that some API may change their billing process, for example, the access to a punctuated text. See the [quota](https://cloud.google.com/speech-to-text/quotas) documentation.
 
 ## Authentication to Google Cloud Service
@@ -42,18 +42,18 @@ The plugin does not automatically convert `Audio` (or `Video`) files to text. Yo
 * **Category**: `Conversion`
 * **Input**: A single `Blob`
 * **Output** the same `Blob`, unchanged
-* Runs the Speech-to_text and set the result in a Context variable whose name is passed as parameter. This variable is the `SpeechToTextResponse` Java response from the service and its methods can be called:
+* Runs the Speech-to-text and set the result in a Context variable whose name is passed as parameter. This variable is the `SpeechToTextResponse` Java response from the service and its methods can be called:
   * `getText()` returns the first transcript, with or without punctuation (depends on parameters)
-  * `getWordTimeOffsets()` returns a JSON array of objects, each ojcte has a "word", a "start" and an "end" fields. "start" and "end" are the number of seconds. (Google can also return nanoseconds, the plugin makes it simpler and returns only seconds)
-  * `getNativeResponse()`: Returns the native, Google `RecognizeResponse` (see this Object in Google documentation if you need to get more information)
+  * `getWordTimeOffsets()` returns a JSON array of objects, each object has a "word", a "start" and an "end" fields. "start" and "end" are the number of seconds. (Google can also return nanoseconds, the plugin makes it simpler and returns only seconds)
+  * `getNativeResponse()`: Returns the native response encapsulated in a `JSONObject`. In current implementation, the plugin uses only REST to call the service. The result is described in [Google Documentation](https://cloud.google.com/speech-to-text/docs/reference/rest/v1/speech/recognize)
 * **Parameters**:
   * `languageCode`(String, **required**): The language code of the audio file (see Google documentation for supported languages))
   * `audioEncoding`(String): The audio encoding as String. See Google documentation for supported encodings.
-    * See Google's `RecognitionConfig.AudioEncoding` enumeration. As of 2018-11-03, we have: "FLAC", "LINEAR16", "MULAW", "AMR", "AMR_WB", "OGG_OPUS", and "SPEEX_WITH_HEADER_BYTE".
+    * See Google's enumeration. As of 2018-11-03, we have: "FLAC", "LINEAR16", "MULAW", "AMR", "AMR_WB", "OGG_OPUS", and "SPEEX_WITH_HEADER_BYTE".
     * Optional. If the audio file is FLAC or WAW, the parameter is not required
   * `sampleRateHertz`(integer): The rate of the audio file. _Optional_. If the audio file is FLAC or WAW, the parameter is not required.
-  *  `withPunctuation`: A `boolean`. If `false`, the text will be returned with no punctuation.
-  *  `withWordTimeOffets`: A `boolean`. If `true`, `getWordTimeOffsets()` will return a JSON array of objects, each object having the word, and the start/end time (in seconds).
+  *  `withPunctuation`: A `boolean`, optional, default value is `true`. If `false`, the text will be returned with no punctuation.
+  *  `withWordTimeOffets`: A `boolean`, optional, default value is `false`. If `true`, `getWordTimeOffsets()` will return a JSON array of objects, each object having the word, and the start/end time (in seconds). This array will be available in the `resultVarName` response
   *  `resultVarName` (String, **required**): The Name of a Context Variable that will contain the `SpeechToTextResponse` object (see above)
  
  Reminder: Before calling this operation, you can, if needed, convert the audio (or video) to `FLAC` using the "audio-to-flac" commandLine converter provided byu the plugin
@@ -70,6 +70,8 @@ Converts a blob of the input document and save the transcript to a field of the 
   * `languageCode`(String, **required**): The language code of the audio file (see Google documentation for supported languages))
   *  `blobXpath`: Source blob to convert
   *  `transcriptXpath`:  Destination `String` field to store the result of the transcript
+  *  `withPunctuation`: A `boolean`, optional, default value is `true`. If `false`, the text will be returned with no punctuation.
+  *  `withWordTimeOffets`: A `boolean`, optional, default value is `false`. If `true`, `getWordTimeOffsets()` will return a JSON array of objects, each object having the word, and the start/end time (in seconds). This array will be available in the `resultVarName` response
   *  `saveDocument` (optional). A `boolean. If `true`, Documen is saved (default is `false`).
   *  `resultVarName (optional): The name of a Context Variable that will contain the `SpeechToTextResponse` object (see above)
 
@@ -80,7 +82,7 @@ Building requires the following software:
 * git
 * maven
 
-Running the plugin requires Google Cloud credentials to access their Cloud Services.
+Running the plugin requires Google Cloud API Key to access their Cloud Services.
 
 
 ## Build
@@ -89,6 +91,8 @@ Running the plugin requires Google Cloud credentials to access their Cloud Servi
     cd nuxeo-speechtotext.git
     
     mvn clean install
+
+Note: See _Authentication to Google Cloud Service_. If no Google API Key is provided, the unit tests calling the service are ignored.
 
 ## Support
 
