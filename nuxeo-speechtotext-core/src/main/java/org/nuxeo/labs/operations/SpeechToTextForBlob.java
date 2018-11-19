@@ -19,7 +19,6 @@
  */
 package org.nuxeo.labs.operations;
 
-import org.apache.commons.lang3.StringUtils;
 import org.nuxeo.ecm.automation.OperationContext;
 import org.nuxeo.ecm.automation.core.Constants;
 import org.nuxeo.ecm.automation.core.annotations.Context;
@@ -28,12 +27,9 @@ import org.nuxeo.ecm.automation.core.annotations.OperationMethod;
 import org.nuxeo.ecm.automation.core.annotations.Param;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.CoreSession;
-import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.labs.api.SpeechToText;
 import org.nuxeo.labs.api.SpeechToTextOptions;
 import org.nuxeo.labs.api.SpeechToTextResponse;
-
-import com.google.cloud.speech.v1.RecognitionConfig;
 
 /**
  *

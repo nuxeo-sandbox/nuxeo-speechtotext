@@ -18,10 +18,8 @@
  */
 package org.nuxeo.labs;
 
-import java.io.File;
 
 import org.apache.commons.lang3.StringUtils;
-import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.runtime.api.Framework;
 
 /**
@@ -29,40 +27,28 @@ import org.nuxeo.runtime.api.Framework;
  */
 public class TestUtils {
 
-    // Relative to the test "resources" folder
-    public static final String CREDENTIALS_FILE_TEST_PATH = "credentials.json";
-
     protected static int credentialFileTest = -1;
 
     /**
-     * @return true if path to credentials is fooun is available
+     * @return true an API key is found either in nuxeo.conf or in the env. variables
      * @since 10.2
      */
     public static boolean loadGoogleCredentials() {
 
-        File credentialsJson = null;
-
         if (credentialFileTest == -1) {
             credentialFileTest = 0;
             try {
-                String credentialsFilePath;
+                String apiKey;
 
                 // Check if set in nuxeo.conf (or equivalent) for the test
-                credentialsFilePath = System.getProperty(SpeechToTextImpl.CREDENTIALS_PATH_PARAM);
+                apiKey = System.getProperty(SpeechToTextImpl.API_KEY_PARAM);
 
                 // If not, check the specific env variable.
-                if (StringUtils.isBlank(credentialsFilePath)) {
-                    credentialsFilePath = System.getenv(SpeechToTextImpl.CREDENTIALS_PATH_ENV_VAR);
-
-                    // Still not there, try the local test file
-                    if (StringUtils.isBlank(credentialsFilePath)) {
-                        credentialsJson = FileUtils.getResourceFileFromContext(CREDENTIALS_FILE_TEST_PATH);
-                        // We are here => no error, there is a CREDENTIAL_FILE_PATH file
-                        credentialsFilePath = credentialsJson.getAbsolutePath();
-                    }
+                if (StringUtils.isBlank(apiKey)) {
+                    apiKey = System.getenv(SpeechToTextImpl.API_KEY_ENV_VAR);
                 }
-                if (StringUtils.isNotBlank(credentialsFilePath)) {
-                    Framework.getProperties().setProperty(SpeechToTextImpl.CREDENTIALS_PATH_PARAM, credentialsFilePath);
+                if (StringUtils.isNotBlank(apiKey)) {
+                    Framework.getProperties().setProperty(SpeechToTextImpl.API_KEY_PARAM, apiKey);
                     credentialFileTest = 1;
                 }
 

@@ -20,10 +20,6 @@
 package org.nuxeo.labs.api;
 
 import org.nuxeo.ecm.core.api.Blob;
-import org.nuxeo.ecm.core.api.NuxeoException;
-
-import com.google.cloud.speech.v1.RecognitionConfig;
-import com.google.cloud.speech.v1.RecognitionConfig.AudioEncoding;
 
 public interface SpeechToText {
 
@@ -48,7 +44,11 @@ public interface SpeechToText {
 
     /**
      * Returns the transcript of the audio file.<br>
-     * The blob must be an audio, or at least a file compatible with the speech to text cloud service *
+     * The blob must be an audio, or at least a file compatible with the speech to text cloud service
+     * <p>
+     * WARNING: audioEncoding must be the exact value as expected by the provider. For Google (first provider
+     * implemented), check
+     * https://cloud.google.com/speech-to-text/docs/reference/rest/v1/RecognitionConfig#AudioEncoding
      * 
      * @param options, the options when calling the service. If null, default options apply see
      *            {@link SpeechToTextOptions}
@@ -61,27 +61,4 @@ public interface SpeechToText {
     SpeechToTextResponse run(SpeechToTextOptions options, Blob blob, String audioEncoding, int sampleRateHertz,
             String languageCode);
 
-    /**
-     * Helper that returns the RecognitionConfig.AudioEncoding value for the name of the enum.<br>
-     * (Useful for Operations, where a caller will pass a string, not an enum value)
-     *
-     * @param valueStr
-     * @return the enum value for the input string
-     * @since 10.2
-     */
-    static public RecognitionConfig.AudioEncoding EncodingNameToEnum(String valueStr) {
-
-        AudioEncoding value = AudioEncoding.UNRECOGNIZED;
-        try {
-            value = AudioEncoding.valueOf(valueStr);
-        } catch (IllegalArgumentException e) {
-            valueStr = valueStr.toUpperCase();
-            try {
-                value = AudioEncoding.valueOf(valueStr);
-            } catch (IllegalArgumentException e2) {
-                throw new NuxeoException("Unrecognized AudioEncoding value: " + valueStr);
-            }
-        }
-        return value;
-    }
 }

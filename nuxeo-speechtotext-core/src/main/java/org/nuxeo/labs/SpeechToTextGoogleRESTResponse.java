@@ -18,22 +18,15 @@
  */
 package org.nuxeo.labs;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.labs.api.SpeechToTextResponse;
 
-import com.google.cloud.speech.v1.RecognizeResponse;
-import com.google.cloud.speech.v1.SpeechRecognitionAlternative;
-import com.google.cloud.speech.v1.SpeechRecognitionResult;
-import com.google.cloud.speech.v1.WordInfo;
-
 /**
- * Encapsulate the resonse received after a call to <code>recognize</code> via REST. <br>
+ * Encapsulate the response received after a call to <code>recognize</code> via REST. <br>
  * <br>
  * See Google doc. at https://cloud.google.com/speech-to-text/docs/reference/rest/v1/speech/recognize. Basically, as of
  * API V1, the result is a JSON Object as string.
@@ -44,23 +37,26 @@ import com.google.cloud.speech.v1.WordInfo;
  * 
  * <pre>
  *  {
- *    "result": {
- *      "alternatives": [
- *        {
- *          "transcript": string,
- *          "confidence": number,
- *          "words": [
- *              {
- *                "startTime": string, "A duration in seconds with up to nine fractional digits, terminated by 's'. Ex; "3.5s"
- *                "endTime": string,
- *                "word": string,
- *              },
- *              . . .
- *          ]
- *        },
- *        . . .
- *      ]
- *    }
+ *    "results": [
+ *      {
+ *        "alternatives": [
+ *          {
+ *            "transcript": string,
+ *            "confidence": number,
+ *            "words": [
+ *                {
+ *                  "startTime": string, "A duration in seconds with up to nine fractional digits, terminated by 's'. Ex; "3.5s"
+ *                  "endTime": string,
+ *                  "word": string,
+ *                },
+ *                . . .
+ *            ]
+ *          },
+ *          . . .
+ *        ]
+ *      },
+ *      . . .
+ *    ]
  *  }
  * </pre>
  * 
@@ -84,7 +80,8 @@ public class SpeechToTextGoogleRESTResponse implements SpeechToTextResponse {
 
         jsonResponse = new JSONObject();
 
-        JSONObject results = new JSONObject();
+        JSONArray results = new JSONArray();
+        JSONObject firstResult = new JSONObject();
         JSONArray alternatives = new JSONArray();
 
         JSONObject errorAlternative = new JSONObject();
@@ -94,7 +91,8 @@ public class SpeechToTextGoogleRESTResponse implements SpeechToTextResponse {
         errorAlternative.put("words", words);
 
         alternatives.put(errorAlternative);
-        results.put("alternatives", alternatives);
+        firstResult.put("alternatives", alternatives);
+        results.put(firstResult);
         jsonResponse.put("results", results);
 
     }
@@ -103,8 +101,9 @@ public class SpeechToTextGoogleRESTResponse implements SpeechToTextResponse {
 
         JSONObject alternative = null;
 
-        JSONObject results = jsonResponse.getJSONObject("results");
-        JSONArray alternatives = results.getJSONArray("alternatives");
+        JSONArray results = jsonResponse.getJSONArray("results");
+        JSONObject firstResult = results.getJSONObject(0);
+        JSONArray alternatives = firstResult.getJSONArray("alternatives");
         alternative = alternatives.getJSONObject(0);
 
         return alternative;
@@ -146,7 +145,7 @@ public class SpeechToTextGoogleRESTResponse implements SpeechToTextResponse {
             JSONObject alternative = getFirstAlternative();
             text = alternative.getString("transcript");
         } catch (JSONException e) {
-
+            throw new NuxeoException("Cannot get the first alternative", e);
         }
         return text;
     }

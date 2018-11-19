@@ -19,12 +19,6 @@
  */
 package org.nuxeo.labs;
 
-import com.google.common.collect.Lists;
-import com.google.api.gax.core.FixedCredentialsProvider;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.speech.v1.*;
-import com.google.protobuf.ByteString;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -49,8 +43,6 @@ import org.nuxeo.runtime.model.ComponentContext;
 import org.nuxeo.runtime.model.ComponentInstance;
 import org.nuxeo.runtime.model.DefaultComponent;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -61,11 +53,9 @@ import java.util.HashMap;
  */
 public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
 
-    public static final String CREDENTIALS_PATH_PARAM = "google.speechtotext.credentials";
+    public static final String API_KEY_PARAM = "google.speechtotext.apikey";
 
-    public static final String CREDENTIALS_PATH_ENV_VAR = "GOOGLE_SPEECHTOTEXT_CREDENTIALS";
-
-    protected volatile SpeechClient speechClient = null;
+    public static final String API_KEY_ENV_VAR = "GOOGLE_SPEECHTOTEXT_APIKEY";
 
     /**
      * Component activated notification. Called when the component is activated. All component dependencies are resolved
@@ -111,50 +101,19 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
         // Logic to do when unregistering any contribution
     }
 
-    protected SpeechClient getSpeechClient() {
+    protected String getGoogleSpeechToTextAPIKey() {
 
-        if (speechClient == null) {
-            synchronized (this) {
-                if (speechClient == null) {
-                    GoogleCredentials credentials = getCredentials();
-                    try {
-                        SpeechSettings speechSettings = SpeechSettings.newBuilder()
-                                                                      .setCredentialsProvider(
-                                                                              FixedCredentialsProvider.create(
-                                                                                      credentials))
-                                                                      .build();
-                        speechClient = SpeechClient.create(speechSettings);
-                    } catch (IOException e) {
-                        throw new NuxeoException("Error getting the Speech-to-Text client", e);
-                    }
-                }
-            }
+        String apiKey = Framework.getProperty(API_KEY_PARAM);
+        if (StringUtils.isBlank(apiKey)) {
+            apiKey = System.getenv(API_KEY_ENV_VAR);
         }
 
-        return speechClient;
-    }
-
-    protected GoogleCredentials getCredentials() {
-
-        String credentialsFilePath = Framework.getProperty(CREDENTIALS_PATH_PARAM);
-        if (StringUtils.isBlank(credentialsFilePath)) {
-            credentialsFilePath = System.getenv(CREDENTIALS_PATH_ENV_VAR);
-        }
-        if (StringUtils.isBlank(credentialsFilePath)) {
-            throw new NuxeoException("Credentials file for Google SPeech To Text APi not found in nuxeo.conf ("
-                    + CREDENTIALS_PATH_PARAM + ") nor in an environement variable (" + CREDENTIALS_PATH_ENV_VAR + ")");
+        if (StringUtils.isBlank(apiKey)) {
+            throw new NuxeoException("API Keyfor Google Speech To Text APi not found in nuxeo.conf (" + API_KEY_PARAM
+                    + ") nor in an environement variable (" + API_KEY_ENV_VAR + ")");
         }
 
-        GoogleCredentials credentials = null;
-        try {
-            credentials = GoogleCredentials.fromStream(new FileInputStream(new File(credentialsFilePath)))
-                                           .createScoped(Lists.newArrayList(
-                                                   "https://www.googleapis.com/auth/cloud-platform"));
-            return credentials;
-        } catch (IOException e) {
-            throw new NuxeoException("Error building Google Credentials", e);
-        }
-
+        return apiKey;
     }
 
     @Override
@@ -168,55 +127,9 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
     @Override
     public SpeechToTextResponse run(SpeechToTextOptions options, Blob blob, String audioEncoding, int sampleRateHertz,
             String languageCode) {
-
-        try {
-            
-            if(languageCode != null) {
-            //return runWithREST(options, blob, audioEncoding, sampleRateHertz, languageCode);
-            }
-
-            if (options == null) {
-                options = SpeechToTextOptions.buildDefaultOptions();
-            }
-
-            // Reads the audio file into memory
-            byte[] data = blob.getByteArray();
-            ByteString audioBytes = ByteString.copyFrom(data);
-            RecognitionAudio audio = RecognitionAudio.newBuilder().setContent(audioBytes).build();
-
-            /*
-             * Google Cloud doc (2018-10-28): << You are not required to specify the encoding and sample rate for WAV or
-             * FLAC files. If omitted, Speech-to-Text automatically determines the encoding and sample rate for WAV or
-             * FLAC files based on the file header. If you specify an encoding or sample rate value that does not match
-             * the value in the file header, then Speech-to-Text returns an error. >>
-             */
-            String mimeType = blob.getMimeType();
-            boolean needsParameters = true;
-            if (StringUtils.isNotBlank(mimeType)) {
-                String mimeTypeLowerCase = mimeType.toLowerCase();
-                needsParameters = mimeTypeLowerCase.indexOf("flac") < 0 && mimeTypeLowerCase.indexOf("wav") < 0;
-            }
-
-            RecognitionConfig.Builder builder;
-            // Shared parameters
-            builder = RecognitionConfig.newBuilder().setLanguageCode(languageCode);
-            // Specific
-            builder = builder.setEnableAutomaticPunctuation(options.isWithPunctuation());
-            builder = builder.setEnableWordTimeOffsets(options.isWithWordTimeOffsets());
-            if (needsParameters) {
-                RecognitionConfig.AudioEncoding encoding = SpeechToText.EncodingNameToEnum(audioEncoding);
-                builder = builder.setEncoding(encoding).setSampleRateHertz(sampleRateHertz);
-            }
-            RecognitionConfig config = builder.build();
-
-            // Performs speech recognition on the audio file
-            RecognizeResponse response = getSpeechClient().recognize(config, audio);
-
-            return new SpeechToTextGoogleResponse(response);
-
-        } catch (IOException e) {
-            throw new NuxeoException("Error getting the Speech-to-Text result", e);
-        }
+        
+        return runWithREST(options, blob, audioEncoding, sampleRateHertz, languageCode);
+        
     }
 
     protected Blob normalizeAudio(Blob input) {
@@ -239,52 +152,69 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
         if (options == null) {
             options = SpeechToTextOptions.buildDefaultOptions();
         }
-        
+
         CloseableHttpClient client = HttpClients.createDefault();
 
         try {
 
-            // Convert audio to Base64 String
+            // ===================================> Convert audio to Base64 String
             byte[] data = blob.getByteArray();
             String audioStr = Base64.getEncoder().encodeToString(data);
 
+            // ===================================> Setup the body (JSON)
             JSONObject jsonBody = new JSONObject();
-            
+
+            // -----------------> Audio (a file sent as Base64, not a uri to a file in Google Storage)
             JSONObject audioJson = new JSONObject();
             audioJson.put("content", audioStr);
             jsonBody.put("audio", audioJson);
 
-            /*
-             * "config": { "encoding":"FLAC", "sampleRateHertz": 16000, "languageCode": "en-US",
-             * "enableAutomaticPunctuation": true, "enableWordTimeOffsets": false },
-             */
-
+            // -----------------> Configuration
             JSONObject config = new JSONObject();
             config.put("languageCode", languageCode);
             config.put("enableAutomaticPunctuation", options.isWithPunctuation());
             config.put("enableWordTimeOffsets", options.isWithWordTimeOffsets());
+            /*
+             * Google Cloud doc (2018-10-28): << You are not required to specify the encoding and sample rate for WAV or
+             * FLAC files. If omitted, Speech-to-Text automatically determines the encoding and sample rate for WAV or
+             * FLAC files based on the file header. If you specify an encoding or sample rate value that does not match
+             * the value in the file header, then Speech-to-Text returns an error. >>
+             */
+            String mimeType = blob.getMimeType();
+            if (StringUtils.isNotBlank(mimeType)) {
+                String mimeTypeLowerCase = mimeType.toLowerCase();
+                if (mimeTypeLowerCase.indexOf("flac") < 0 && mimeTypeLowerCase.indexOf("wav") < 0) {
+                    config.put("encoding", audioEncoding);
+                    config.put("sampleRateHertz", sampleRateHertz);
+                }
+            }
             jsonBody.put("config", config);
-            
+
             String bodyJsonStr = jsonBody.toString();
 
-            String apiKey = System.getenv("GOOGLE_SPEECHTOTEXT_APIKEY");
-            String url = "https://speech.googleapis.com/v1/speech:recognize?key=" + apiKey;
+            // ===================================> Call the service
+            String url = "https://speech.googleapis.com/v1/speech:recognize?key=" + getGoogleSpeechToTextAPIKey();
             HttpPost httpPost = new HttpPost(url);
-            
+
             StringEntity bodyEntity = new StringEntity(bodyJsonStr);
             httpPost.setEntity(bodyEntity);
             httpPost.setHeader("Accept", "application/json");
             httpPost.setHeader("Content-type", "application/json");
             CloseableHttpResponse httpResponse = client.execute(httpPost);
-            
-            int httpResponsecode = httpResponse.getStatusLine().getStatusCode();
-            HttpEntity responseEntity = httpResponse.getEntity();
-            BufferedHttpEntity buf = new BufferedHttpEntity(responseEntity);
-            String responseContent = EntityUtils.toString(buf, StandardCharsets.UTF_8);
-            System.out.println("\n" + responseContent + "\n");
-            
-        } catch (Exception e) {
 
+            // ===================================> Get the result
+            int httpResponsecode = httpResponse.getStatusLine().getStatusCode();
+            if (httpResponsecode != 200) {
+                throw new NuxeoException("Problem calling teh service, Status code: " + httpResponsecode);
+            } else {
+                HttpEntity responseEntity = httpResponse.getEntity();
+                BufferedHttpEntity buf = new BufferedHttpEntity(responseEntity);
+                String responseContent = EntityUtils.toString(buf, StandardCharsets.UTF_8);
+                response = new SpeechToTextGoogleRESTResponse(responseContent);
+            }
+
+        } catch (IOException | JSONException e) {
+            throw new NuxeoException("Error getting the speech-to-text", e);
         } finally {
             try {
                 client.close();
