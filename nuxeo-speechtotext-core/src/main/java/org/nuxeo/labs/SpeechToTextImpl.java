@@ -138,11 +138,11 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
         if (StringUtils.isNotBlank(mimeType)) {
             String mimeTypeLowerCase = mimeType.toLowerCase();
             if (mimeTypeLowerCase.indexOf("flac") > -1 || mimeTypeLowerCase.indexOf("wav") > -1) {
-                return false;
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 
     protected Blob normalizeAudio(Blob blob) {
