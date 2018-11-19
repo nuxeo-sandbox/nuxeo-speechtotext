@@ -197,7 +197,7 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
              * FLAC files based on the file header. If you specify an encoding or sample rate value that does not match
              * the value in the file header, then Speech-to-Text returns an error. >>
              */
-            if (isFlacOrWav(blob)) {
+            if (!isFlacOrWav(blob)) {
                 config.put("encoding", audioEncoding);
                 config.put("sampleRateHertz", sampleRateHertz);
             }
