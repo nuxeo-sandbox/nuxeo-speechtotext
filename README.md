@@ -50,11 +50,12 @@ The plugin does not automatically convert `Audio` (or `Video`) files to text. Yo
 * **Parameters**:
   * `languageCode`(String, **required**): The language code of the audio file (see Google documentation for supported languages))
   * `audioEncoding`(String): The audio encoding as String. See Google documentation for supported encodings.
-    * See Google's enumeration. As of 2018-11-03, we have: "FLAC", "LINEAR16", "MULAW", "AMR", "AMR_WB", "OGG_OPUS", and "SPEEX_WITH_HEADER_BYTE".
+    * See Google's enumeration. As of 2018-11-03, we have: `"FLAC"`, `"LINEAR16"`, `"MULAW"`, `"AMR"`, `"AMR_WB"`, `"OGG_OPUS"`, and `"SPEEX_WITH_HEADER_BYTE"`.
     * Optional. If the audio file is FLAC or WAW, the parameter is not required
   * `sampleRateHertz`(integer): The rate of the audio file. _Optional_. If the audio file is FLAC or WAW, the parameter is not required.
   *  `withPunctuation`: A `boolean`, optional, default value is `true`. If `false`, the text will be returned with no punctuation.
   *  `withWordTimeOffets`: A `boolean`, optional, default value is `false`. If `true`, `getWordTimeOffsets()` will return a JSON array of objects, each object having the word, and the start/end time (in seconds). This array will be available in the `resultVarName` response
+  *  `moreOptionsJSONStr` (String, optional). Add more configuration parameters to send to the service. The plug-in does not encapsulate and handle all and every features of the provider. Passing more parameter is a way to get the results the plug-in does not fetch by default. See the provider REST API documentation (for the current version, see above) 
   *  `resultVarName` (String, **required**): The Name of a Context Variable that will contain the `SpeechToTextResponse` object (see above)
  
  Reminder: Before calling this operation, you can, if needed, convert the audio (or video) to `FLAC` using the "audio-to-flac" commandLine converter provided byu the plugin
@@ -73,8 +74,9 @@ Converts a blob of the input document and save the transcript to a field of the 
   *  `transcriptXpath`:  Destination `String` field to store the result of the transcript
   *  `withPunctuation`: A `boolean`, optional, default value is `true`. If `false`, the text will be returned with no punctuation.
   *  `withWordTimeOffets`: A `boolean`, optional, default value is `false`. If `true`, `getWordTimeOffsets()` will return a JSON array of objects, each object having the word, and the start/end time (in seconds). This array will be available in the `resultVarName` response
-  *  `saveDocument` (optional). A `boolean. If `true`, Documen is saved (default is `false`).
-  *  `resultVarName (optional): The name of a Context Variable that will contain the `SpeechToTextResponse` object (see above)
+  *  `moreOptionsJSONStr` (String, optional). Add more configuration parameters to send to the service. The plug-in does not encapsulate and handle all and every features of the provider. Passing more parameter is a way to get the results the plug-in does not fetch by default. See the provider REST API documentation (for the current version, see above) 
+  *  `saveDocument` (optional). A `boolean`. If `true`, Document is saved (default is `false`).
+  *  `resultVarName` (optional): The name of a Context Variable that will contain the `SpeechToTextResponse` object (see above)
 
 ## Requirements
 
