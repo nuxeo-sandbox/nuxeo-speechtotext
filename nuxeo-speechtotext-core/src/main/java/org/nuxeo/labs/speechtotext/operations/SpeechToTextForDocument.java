@@ -20,6 +20,8 @@
 package org.nuxeo.labs.speechtotext.operations;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.nuxeo.ecm.automation.OperationContext;
 import org.nuxeo.ecm.automation.core.Constants;
 import org.nuxeo.ecm.automation.core.annotations.Context;
@@ -48,7 +50,7 @@ public class SpeechToTextForDocument {
 
     @Context
     protected CoreSession session;
-    
+
     @Context
     protected OperationContext ctx;
 
@@ -70,14 +72,17 @@ public class SpeechToTextForDocument {
     @Param(name = "withWordTimeOffets", required = false, values = { "false" })
     protected boolean withWordTimeOffets = false;
 
+    @Param(name = "moreOptionsJSONStr", required = false)
+    protected String moreOptionsJSONStr = null;
+
     @Param(name = "saveDocument", required = false, values = { "false" })
     protected boolean saveDocument = false;
-    
+
     @Param(name = "resultVarName", required = false)
     protected String resultVarName;
 
     @OperationMethod
-    public DocumentModel run(DocumentModel input) {
+    public DocumentModel run(DocumentModel input) throws JSONException {
 
         String transcript = null;
         SpeechToTextResponse response = null;
@@ -85,12 +90,18 @@ public class SpeechToTextForDocument {
         Blob blob = (Blob) input.getPropertyValue(blobXpath);
 
         if (blob != null) {
-            response = speechToText.run(new SpeechToTextOptions(withPunctuation, withWordTimeOffets), blob, languageCode);
+            JSONObject moreOptions = null;
+            if (StringUtils.isNotBlank(moreOptionsJSONStr)) {
+                moreOptions = new JSONObject(moreOptionsJSONStr);
+            }
+
+            response = speechToText.run(new SpeechToTextOptions(withPunctuation, withWordTimeOffets), blob,
+                    languageCode, moreOptions);
             transcript = response.getText();
         }
 
         input.setPropertyValue(transcriptXpath, transcript);
-        
+
         if (StringUtils.isNotBlank(resultVarName)) {
             ctx.put(resultVarName, response);
         }

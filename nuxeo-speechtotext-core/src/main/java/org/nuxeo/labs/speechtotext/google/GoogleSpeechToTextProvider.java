@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -32,6 +33,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.nuxeo.ecm.core.api.Blob;
@@ -39,6 +41,7 @@ import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
 import org.nuxeo.ecm.core.api.blobholder.SimpleBlobHolder;
 import org.nuxeo.ecm.core.convert.api.ConversionService;
+import org.nuxeo.labs.speechtotext.api.SpeechToText;
 import org.nuxeo.labs.speechtotext.api.SpeechToTextOptions;
 import org.nuxeo.labs.speechtotext.api.SpeechToTextProvider;
 import org.nuxeo.labs.speechtotext.api.SpeechToTextResponse;
@@ -61,18 +64,18 @@ public class GoogleSpeechToTextProvider implements SpeechToTextProvider {
     }
 
     @Override
-    public SpeechToTextResponse run(SpeechToTextOptions options, Blob blob, String languageCode) {
+    public SpeechToTextResponse run(SpeechToTextOptions options, Blob blob, String languageCode, JSONObject moreOptions) {
 
         Blob normalized = normalizeAudio(blob);
 
-        return run(options, normalized, null, -1, languageCode);
+        return run(options, normalized, null, -1, languageCode, moreOptions);
     }
 
     @Override
     public SpeechToTextResponse run(SpeechToTextOptions options, Blob blob, String audioEncoding, int sampleRateHertz,
-            String languageCode) {
+            String languageCode, JSONObject moreOptions) {
 
-        return runWithREST(options, blob, audioEncoding, sampleRateHertz, languageCode);
+        return runWithREST(options, blob, audioEncoding, sampleRateHertz, languageCode, moreOptions);
 
     }
     
@@ -121,7 +124,7 @@ public class GoogleSpeechToTextProvider implements SpeechToTextProvider {
     }
     
     protected SpeechToTextResponse runWithREST(SpeechToTextOptions options, Blob blob, String audioEncoding,
-            int sampleRateHertz, String languageCode) {
+            int sampleRateHertz, String languageCode, JSONObject moreOptions) {
 
         SpeechToTextResponse response = null;
 
@@ -160,10 +163,14 @@ public class GoogleSpeechToTextProvider implements SpeechToTextProvider {
                 config.put("encoding", audioEncoding);
                 config.put("sampleRateHertz", sampleRateHertz);
             }
+            // Handle speakers
             if(options.isWithDetectSpeakers()) {
                 config.put("enableSpeakerDiarization",  true);
                 config.put("diarizationSpeakerCount", 2);
             }
+            // Handle more options
+            config = SpeechToText.mergeJSONObjects(config, moreOptions);
+            
             jsonBody.put("config", config);
 
             String bodyJsonStr = jsonBody.toString();

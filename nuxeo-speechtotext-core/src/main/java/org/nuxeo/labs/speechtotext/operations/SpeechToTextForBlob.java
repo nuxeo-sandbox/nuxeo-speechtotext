@@ -19,6 +19,9 @@
  */
 package org.nuxeo.labs.speechtotext.operations;
 
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.nuxeo.ecm.automation.OperationContext;
 import org.nuxeo.ecm.automation.core.Constants;
 import org.nuxeo.ecm.automation.core.annotations.Context;
@@ -68,15 +71,22 @@ public class SpeechToTextForBlob {
     @Param(name = "withWordTimeOffets", required = false, values = { "false" })
     protected boolean withWordTimeOffets = false;
 
+    @Param(name = "moreOptionsJSONStr", required = false)
+    protected String moreOptionsJSONStr = null;
+
     @Param(name = "resultVarName", required = true)
     protected String resultVarName;
 
     @OperationMethod
-    public Blob run(Blob input) {
+    public Blob run(Blob input) throws JSONException {
 
         SpeechToTextOptions options = new SpeechToTextOptions(withPunctuation, withWordTimeOffets);
 
-        SpeechToTextResponse response = speechToText.run(options, input, audioEncoding, sampleRateHertz, languageCode);
+        JSONObject moreOptions = null;
+        if(StringUtils.isNotBlank(moreOptionsJSONStr)) {
+            moreOptions = new JSONObject(moreOptionsJSONStr);
+        }
+        SpeechToTextResponse response = speechToText.run(options, input, audioEncoding, sampleRateHertz, languageCode, moreOptions);
 
         ctx.put(resultVarName, response);
 

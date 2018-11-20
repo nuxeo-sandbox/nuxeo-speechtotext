@@ -19,6 +19,7 @@
  */
 package org.nuxeo.labs.speechtotext.impl;
 
+import org.json.JSONObject;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.labs.speechtotext.api.SpeechToText;
 import org.nuxeo.labs.speechtotext.api.SpeechToTextOptions;
@@ -84,16 +85,16 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
     }
 
     @Override
-    public SpeechToTextResponse run(SpeechToTextOptions options, Blob blob, String languageCode) {
+    public SpeechToTextResponse run(SpeechToTextOptions options, Blob blob, String languageCode, JSONObject moreOptions) {
 
-        return googleProvider.run(options, blob, languageCode);
+        return googleProvider.run(options, blob, languageCode, moreOptions);
     }
 
     @Override
     public SpeechToTextResponse run(SpeechToTextOptions options, Blob blob, String audioEncoding, int sampleRateHertz,
-            String languageCode) {
+            String languageCode, JSONObject moreOptions) {
 
-        return googleProvider.run(options, blob, audioEncoding, sampleRateHertz, languageCode);
+        return googleProvider.run(options, blob, audioEncoding, sampleRateHertz, languageCode, moreOptions);
     }
 
 }
