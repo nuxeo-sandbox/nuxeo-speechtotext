@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <component name="org.nuxeo.labs.SpeechToText" version="1.0">
 
-  <implementation class="org.nuxeo.labs.SpeechToTextImpl" />
+  <implementation class="org.nuxeo.labs.speechtotext.impl.SpeechToTextImpl" />
 
   <service>
-    <provide interface="org.nuxeo.labs.api.SpeechToText" />
+    <provide interface="org.nuxeo.labs.speechtotext.api.SpeechToText" />
   </service>
 </component>

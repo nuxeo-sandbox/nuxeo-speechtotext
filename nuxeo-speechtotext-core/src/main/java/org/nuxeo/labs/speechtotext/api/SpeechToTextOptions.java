@@ -16,7 +16,7 @@
  * Contributors:
  *     Thibaud Arguillere
  */
-package org.nuxeo.labs.api;
+package org.nuxeo.labs.speechtotext.api;
 
 /**
  * Utility class to setup options when calling the service.

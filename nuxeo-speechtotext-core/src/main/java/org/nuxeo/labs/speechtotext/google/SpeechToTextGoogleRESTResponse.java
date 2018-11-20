@@ -16,14 +16,14 @@
  * Contributors:
  *     Thibaud Arguillere
  */
-package org.nuxeo.labs;
+package org.nuxeo.labs.speechtotext.google;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.nuxeo.ecm.core.api.NuxeoException;
-import org.nuxeo.labs.api.SpeechToTextResponse;
+import org.nuxeo.labs.speechtotext.api.SpeechToTextResponse;
 
 /**
  * Encapsulate the response received after a call to <code>recognize</code> via REST. <br>

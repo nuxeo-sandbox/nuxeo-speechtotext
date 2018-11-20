@@ -17,7 +17,7 @@
  *     Eliot Kim
  *     Thibaud Arguillere
  */
-package org.nuxeo.labs.operations;
+package org.nuxeo.labs.speechtotext.operations;
 
 import org.nuxeo.ecm.automation.OperationContext;
 import org.nuxeo.ecm.automation.core.Constants;
@@ -27,9 +27,9 @@ import org.nuxeo.ecm.automation.core.annotations.OperationMethod;
 import org.nuxeo.ecm.automation.core.annotations.Param;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.CoreSession;
-import org.nuxeo.labs.api.SpeechToText;
-import org.nuxeo.labs.api.SpeechToTextOptions;
-import org.nuxeo.labs.api.SpeechToTextResponse;
+import org.nuxeo.labs.speechtotext.api.SpeechToText;
+import org.nuxeo.labs.speechtotext.api.SpeechToTextOptions;
+import org.nuxeo.labs.speechtotext.api.SpeechToTextResponse;
 
 /**
  *

@@ -17,7 +17,7 @@
  *     Eliot Kim
  *     Thibaud Arguillere
  */
-package org.nuxeo.labs.api;
+package org.nuxeo.labs.speechtotext.api;
 
 import org.nuxeo.ecm.core.api.Blob;
 

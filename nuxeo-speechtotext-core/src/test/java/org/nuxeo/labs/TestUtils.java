@@ -20,6 +20,7 @@ package org.nuxeo.labs;
 
 
 import org.apache.commons.lang3.StringUtils;
+import org.nuxeo.labs.speechtotext.impl.SpeechToTextImpl;
 import org.nuxeo.runtime.api.Framework;
 
 /**

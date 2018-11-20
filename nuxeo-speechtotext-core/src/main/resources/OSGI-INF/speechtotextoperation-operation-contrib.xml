@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
-<component name="org.nuxeo.labs.operation.speechtotextoperation" version="1.0">
+<component name="org.nuxeo.labs.speechtotext.operations" version="1.0">
 
   <extension point="operations" target="org.nuxeo.ecm.core.operation.OperationServiceComponent">
-    <operation class="org.nuxeo.labs.operations.SpeechToTextForDocument" />
-    <operation class="org.nuxeo.labs.operations.SpeechToTextForBlob" />
+    <operation class="org.nuxeo.labs.speechtotext.operations.SpeechToTextForDocument" />
+    <operation class="org.nuxeo.labs.speechtotext.operations.SpeechToTextForBlob" />
   </extension>
 
 </component>

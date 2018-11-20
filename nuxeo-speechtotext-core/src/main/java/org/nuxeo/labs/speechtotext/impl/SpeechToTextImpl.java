@@ -17,7 +17,7 @@
  *     Eliot Kim
  *     Thibaud Arguillere
  */
-package org.nuxeo.labs;
+package org.nuxeo.labs.speechtotext.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -35,9 +35,10 @@ import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
 import org.nuxeo.ecm.core.api.blobholder.SimpleBlobHolder;
 import org.nuxeo.ecm.core.convert.api.ConversionService;
-import org.nuxeo.labs.api.SpeechToText;
-import org.nuxeo.labs.api.SpeechToTextOptions;
-import org.nuxeo.labs.api.SpeechToTextResponse;
+import org.nuxeo.labs.speechtotext.api.SpeechToText;
+import org.nuxeo.labs.speechtotext.api.SpeechToTextOptions;
+import org.nuxeo.labs.speechtotext.api.SpeechToTextResponse;
+import org.nuxeo.labs.speechtotext.google.SpeechToTextGoogleRESTResponse;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.model.ComponentContext;
 import org.nuxeo.runtime.model.ComponentInstance;
