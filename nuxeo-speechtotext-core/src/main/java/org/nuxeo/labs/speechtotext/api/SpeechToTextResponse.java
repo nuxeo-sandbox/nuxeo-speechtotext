@@ -39,9 +39,9 @@ public interface SpeechToTextResponse {
      * alternatives). The array contains JSONObject with the following fields:<BR>
      * "word": The word<BR>
      * "start": Number, the start time for the word, in seconds <BR>
-     * "end": Number, the end time for the word, in seconds
+     * "end": Number, the end time for the word, in seconds <br>
      * 
-     * @return the JSONArray of the words and their offset
+     * @return the JSONArray of the words and their offset (+/- speaker)
      */
     JSONArray getWordTimeOffsets() throws JSONException;
 

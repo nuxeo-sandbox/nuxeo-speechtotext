@@ -43,16 +43,16 @@ public class SpeechToTextOptions {
         return withPunctuation;
     }
 
-    public void setWithPunctuation(boolean withPunctuation) {
-        this.withPunctuation = withPunctuation;
+    public void setWithPunctuation(boolean value) {
+        withPunctuation = value;
     }
 
     public boolean isWithWordTimeOffsets() {
         return withWordTimeOffsets;
     }
 
-    public void setWithWordTimeOffsets(boolean withWordTimeOffsets) {
-        this.withWordTimeOffsets = withWordTimeOffsets;
+    public void setWithWordTimeOffsets(boolean value) {
+        withWordTimeOffsets = value;
     }
 
 }

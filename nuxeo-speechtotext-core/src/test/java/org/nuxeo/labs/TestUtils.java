@@ -20,7 +20,7 @@ package org.nuxeo.labs;
 
 
 import org.apache.commons.lang3.StringUtils;
-import org.nuxeo.labs.speechtotext.impl.SpeechToTextImpl;
+import org.nuxeo.labs.speechtotext.google.GoogleSpeechToTextProvider;
 import org.nuxeo.runtime.api.Framework;
 
 /**
@@ -42,14 +42,14 @@ public class TestUtils {
                 String apiKey;
 
                 // Check if set in nuxeo.conf (or equivalent) for the test
-                apiKey = System.getProperty(SpeechToTextImpl.API_KEY_PARAM);
+                apiKey = System.getProperty(GoogleSpeechToTextProvider.API_KEY_PARAM);
 
                 // If not, check the specific env variable.
                 if (StringUtils.isBlank(apiKey)) {
-                    apiKey = System.getenv(SpeechToTextImpl.API_KEY_ENV_VAR);
+                    apiKey = System.getenv(GoogleSpeechToTextProvider.API_KEY_ENV_VAR);
                 }
                 if (StringUtils.isNotBlank(apiKey)) {
-                    Framework.getProperties().setProperty(SpeechToTextImpl.API_KEY_PARAM, apiKey);
+                    Framework.getProperties().setProperty(GoogleSpeechToTextProvider.API_KEY_PARAM, apiKey);
                     credentialFileTest = 1;
                 }
 

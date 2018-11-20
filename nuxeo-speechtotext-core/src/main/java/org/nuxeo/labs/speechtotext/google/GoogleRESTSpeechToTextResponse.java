@@ -67,11 +67,11 @@ import org.nuxeo.labs.speechtotext.api.SpeechToTextResponse;
  * 
  * @since 10.2
  */
-public class SpeechToTextGoogleRESTResponse implements SpeechToTextResponse {
+public class GoogleRESTSpeechToTextResponse implements SpeechToTextResponse {
 
     JSONObject jsonResponse = null;
 
-    public SpeechToTextGoogleRESTResponse(String httpResponse) throws JSONException {
+    public GoogleRESTSpeechToTextResponse(String httpResponse) throws JSONException {
         try {
             jsonResponse = new JSONObject(httpResponse);
         } catch (JSONException e) {
