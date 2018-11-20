@@ -24,6 +24,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.common.utils.FileUtils;
@@ -66,7 +68,7 @@ public class TestSpeechToText {
     protected SpeechToText speechToText;
 
     @Test
-    public void testServiceWithBlobToConvert() {
+    public void testServiceWithBlobToConvert() throws Exception {
 
         assumeTrue("Google credentials not found => no test", TestUtils.loadGoogleCredentials());
 
@@ -80,6 +82,9 @@ public class TestSpeechToText {
 
         assertNotNull(transcript);
         assertTrue(transcript.toLowerCase().indexOf("this is john") > -1);
+
+        double confidence = response.getConfidence();
+        assertTrue(confidence > 0.5);
 
     }
 

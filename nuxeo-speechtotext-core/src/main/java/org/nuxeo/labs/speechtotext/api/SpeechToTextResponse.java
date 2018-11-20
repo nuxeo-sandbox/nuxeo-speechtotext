@@ -33,6 +33,13 @@ public interface SpeechToTextResponse {
      * @return the text of the transcript
      */
     String getText();
+    
+    /**
+     * Return the confidence score for the text returned by getText()
+     * 
+     * @return the confidence, 0-1
+     */
+    double getConfidence();
 
     /**
      * Returns a JSON array of the words found in most relevant transcript (when a Cloud service may return
@@ -40,6 +47,9 @@ public interface SpeechToTextResponse {
      * "word": The word<BR>
      * "start": Number, the start time for the word, in seconds <BR>
      * "end": Number, the end time for the word, in seconds <br>
+     * "confidence": Number, 0-1
+     * If there are different speakers and options have been set to detect this, another field can be included:<br>
+     * "speaker": Number, the ID of the speaker (starts at 1)
      * 
      * @return the JSONArray of the words and their offset (+/- speaker)
      */

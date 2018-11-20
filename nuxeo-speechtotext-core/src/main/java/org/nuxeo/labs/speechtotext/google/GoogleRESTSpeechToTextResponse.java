@@ -69,7 +69,12 @@ import org.nuxeo.labs.speechtotext.api.SpeechToTextResponse;
  */
 public class GoogleRESTSpeechToTextResponse implements SpeechToTextResponse {
 
-    JSONObject jsonResponse = null;
+    protected JSONObject jsonResponse = null;
+
+    protected String cachedText = null;
+    
+    protected Double cachedConfidence = null;
+    
 
     public GoogleRESTSpeechToTextResponse(String httpResponse) throws JSONException {
         try {
@@ -153,15 +158,32 @@ public class GoogleRESTSpeechToTextResponse implements SpeechToTextResponse {
     @Override
     public String getText() {
 
-        String text = null;
-
-        try {
-            JSONObject alternative = getFirstAlternative();
-            text = alternative.getString("transcript");
-        } catch (JSONException e) {
-            throw new NuxeoException("Cannot get the first alternative", e);
+        if (cachedText == null) {
+            try {
+                JSONObject alternative = getFirstAlternative();
+                cachedText = alternative.getString("transcript");
+            } catch (JSONException e) {
+                throw new NuxeoException("Cannot get the first alternative to read its transcript", e);
+            }
         }
-        return text;
+        return cachedText;
+    }
+
+    @Override
+    public double getConfidence() {
+        
+        if(cachedConfidence == null) {
+            try {
+                JSONObject alternative = getFirstAlternative();
+                cachedConfidence = alternative.getDouble("confidence");
+            } catch (JSONException e) {
+                throw new NuxeoException("Cannot get the first alternative to read its confidence", e);
+            }
+        }
+        if(cachedConfidence == null) {
+            return -1;
+        }
+        return cachedConfidence.doubleValue();
     }
 
     /*
