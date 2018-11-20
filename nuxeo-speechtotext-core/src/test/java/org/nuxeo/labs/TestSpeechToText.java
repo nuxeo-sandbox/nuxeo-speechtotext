@@ -19,6 +19,7 @@
  */
 package org.nuxeo.labs;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
@@ -78,8 +79,8 @@ public class TestSpeechToText {
         // Service will convert to flac
         SpeechToTextResponse response = speechToText.run(null, audioBlob, "en-US");
         assertNotNull(response);
+        
         String transcript = response.getText();
-
         assertNotNull(transcript);
         assertTrue(transcript.toLowerCase().indexOf("this is john") > -1);
 
@@ -101,7 +102,7 @@ public class TestSpeechToText {
         SpeechToTextResponse response = speechToText.run(options, audioBlob, "en-US");
         assertNotNull(response);
 
-        JSONArray array = response.getWordTimeOffsets();
+        JSONArray array = response.getWordTimeOffsets(false);
         assertNotNull(array);
         assertTrue(array.length() > 0);
 
@@ -113,6 +114,42 @@ public class TestSpeechToText {
         assertTrue(arrayStr.indexOf("\"word\":\"john\"") > -1);
         assertTrue(arrayStr.indexOf("\"word\":\"test\"") > -1);
         assertTrue(arrayStr.indexOf("\"word\":\"french\"") > -1);
+
+    }
+
+    @Test
+    public void testWith2Speakers() throws Exception {
+
+        assumeTrue("Google credentials not found => no test", TestUtils.loadGoogleCredentials());
+
+        File audioFile = FileUtils.getResourceFileFromContext("2-Speakers.aac");
+        Blob audioBlob = new FileBlob(audioFile);
+
+        // Service will convert to flac
+        // No punctuation for this test
+        SpeechToTextOptions options = new SpeechToTextOptions(false, false);
+        // Set speaker detection
+        options.setWithDetectSpeakers(true);
+        SpeechToTextResponse response = speechToText.run(options, audioBlob, "en-US");
+        assertNotNull(response);
+
+        // As of "today" (writing of this test, 2018-11), Google API does not detect 2 different speakers...
+        // Let's check it at least get some works from each speaker
+        String transcript = response.getText();
+        assertNotNull(transcript);
+        
+        String transcriptLC = transcript.toLowerCase();
+        
+        assertTrue(transcriptLC.indexOf("weather looks good") > -1);
+        assertTrue(transcriptLC.indexOf("yes it does") > -1);
+        
+        // Still, check there is at least one speaker
+        JSONArray array = response.getWordTimeOffsets(true);
+        assertNotNull(array);
+        assertTrue(array.length() > 0);
+        JSONObject aWord = array.getJSONObject(0);
+        assertTrue(aWord.has("speakerTag"));
+        assertEquals(aWord.getInt("speakerTag"), 1);
 
     }
 

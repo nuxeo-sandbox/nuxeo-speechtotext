@@ -72,9 +72,8 @@ public class GoogleRESTSpeechToTextResponse implements SpeechToTextResponse {
     protected JSONObject jsonResponse = null;
 
     protected String cachedText = null;
-    
+
     protected Double cachedConfidence = null;
-    
 
     public GoogleRESTSpeechToTextResponse(String httpResponse) throws JSONException {
         try {
@@ -171,8 +170,8 @@ public class GoogleRESTSpeechToTextResponse implements SpeechToTextResponse {
 
     @Override
     public double getConfidence() {
-        
-        if(cachedConfidence == null) {
+
+        if (cachedConfidence == null) {
             try {
                 JSONObject alternative = getFirstAlternative();
                 cachedConfidence = alternative.getDouble("confidence");
@@ -180,7 +179,7 @@ public class GoogleRESTSpeechToTextResponse implements SpeechToTextResponse {
                 throw new NuxeoException("Cannot get the first alternative to read its confidence", e);
             }
         }
-        if(cachedConfidence == null) {
+        if (cachedConfidence == null) {
             return -1;
         }
         return cachedConfidence.doubleValue();
@@ -188,9 +187,10 @@ public class GoogleRESTSpeechToTextResponse implements SpeechToTextResponse {
 
     /*
      * Here, we convert to a JSON Array with Double values instead of String for the offsets.
+     * It can be big, we don't cache it.
      */
     @Override
-    public JSONArray getWordTimeOffsets() throws JSONException {
+    public JSONArray getWordTimeOffsets(boolean withSpeakerTag) throws JSONException {
 
         JSONArray array = new JSONArray();
 
@@ -205,6 +205,9 @@ public class GoogleRESTSpeechToTextResponse implements SpeechToTextResponse {
                 obj.put("word", oneResultWord.getString("word"));
                 obj.put("start", parseDuration(oneResultWord.getString("startTime")));
                 obj.put("end", parseDuration(oneResultWord.getString("endTime")));
+                if(withSpeakerTag) {
+                    obj.put("speakerTag", oneResultWord.getInt("speakerTag"));
+                }
 
                 array.put(obj);
             }

@@ -25,9 +25,11 @@ package org.nuxeo.labs.speechtotext.api;
  */
 public class SpeechToTextOptions {
 
-    protected boolean withPunctuation;
+    protected boolean withPunctuation = true;
 
-    protected boolean withWordTimeOffsets;
+    protected boolean withWordTimeOffsets = false;;
+    
+    protected boolean withDetectSpeakers = false;
 
     public SpeechToTextOptions(boolean withPunctuation, boolean withWordTimeOffsets) {
         super();
@@ -53,6 +55,14 @@ public class SpeechToTextOptions {
 
     public void setWithWordTimeOffsets(boolean value) {
         withWordTimeOffsets = value;
+    }
+    
+    public void setWithDetectSpeakers(boolean value) {
+        withDetectSpeakers = true;
+    }
+    
+    public boolean isWithDetectSpeakers() {
+        return withDetectSpeakers;
     }
 
 }

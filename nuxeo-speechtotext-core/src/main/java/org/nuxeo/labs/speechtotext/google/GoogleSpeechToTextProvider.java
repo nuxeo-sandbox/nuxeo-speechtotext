@@ -160,6 +160,10 @@ public class GoogleSpeechToTextProvider implements SpeechToTextProvider {
                 config.put("encoding", audioEncoding);
                 config.put("sampleRateHertz", sampleRateHertz);
             }
+            if(options.isWithDetectSpeakers()) {
+                config.put("enableSpeakerDiarization",  true);
+                config.put("diarizationSpeakerCount", 2);
+            }
             jsonBody.put("config", config);
 
             String bodyJsonStr = jsonBody.toString();

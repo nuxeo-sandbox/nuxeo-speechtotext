@@ -33,7 +33,7 @@ public interface SpeechToTextResponse {
      * @return the text of the transcript
      */
     String getText();
-    
+
     /**
      * Return the confidence score for the text returned by getText()
      * 
@@ -48,12 +48,16 @@ public interface SpeechToTextResponse {
      * "start": Number, the start time for the word, in seconds <BR>
      * "end": Number, the end time for the word, in seconds <br>
      * "confidence": Number, 0-1
-     * If there are different speakers and options have been set to detect this, another field can be included:<br>
-     * "speaker": Number, the ID of the speaker (starts at 1)
+     * If withSpeakerTag is true and there are different speakers and options have been set to detect this, another
+     * field can be included:<br>
+     * "speakerTag": Number, the ID of the speaker (starts at 1)<BR>
+     * WARNING: When withSpeakerTag is true, , the reponse assumes there is a speaker tag. Will raise and exception if
+     * the response does not have one (and it is supposrted by the provider. If not supported by the provider, no value
+     * is returned)
      * 
      * @return the JSONArray of the words and their offset (+/- speaker)
      */
-    JSONArray getWordTimeOffsets() throws JSONException;
+    JSONArray getWordTimeOffsets(boolean withSpeakerTag) throws JSONException;
 
     /**
      * @return the native object returned by the service provider
