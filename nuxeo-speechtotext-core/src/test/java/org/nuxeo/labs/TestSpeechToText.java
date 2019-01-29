@@ -52,6 +52,7 @@ import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import com.google.inject.Inject;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Iterator;
 
 @RunWith(FeaturesRunner.class)
@@ -76,6 +77,7 @@ public class TestSpeechToText {
 
         File audioFile = FileUtils.getResourceFileFromContext("test-audio.aac");
         Blob audioBlob = new FileBlob(audioFile);
+        audioBlob = TestUtils.updateMimetypeIfNeeded(audioBlob);
 
         // Service will convert to flac
         SpeechToTextResponse response = speechToText.run(null, audioBlob, "en-US", null);
@@ -97,6 +99,7 @@ public class TestSpeechToText {
 
         File audioFile = FileUtils.getResourceFileFromContext("test-audio.aac");
         Blob audioBlob = new FileBlob(audioFile);
+        audioBlob = TestUtils.updateMimetypeIfNeeded(audioBlob);
 
         // Service will convert to flac
         SpeechToTextOptions options = new SpeechToTextOptions(false, true);
@@ -126,6 +129,7 @@ public class TestSpeechToText {
         // SOP far we just have the single speaker audio. Still using it.
         File audioFile = FileUtils.getResourceFileFromContext("test-audio.aac");
         Blob audioBlob = new FileBlob(audioFile);
+        audioBlob = TestUtils.updateMimetypeIfNeeded(audioBlob);
 
         // Service will convert to flac
         // No punctuation for this test
@@ -160,6 +164,7 @@ public class TestSpeechToText {
 
         File audioFile = FileUtils.getResourceFileFromContext("test-audio.aac");
         Blob audioBlob = new FileBlob(audioFile);
+        audioBlob = TestUtils.updateMimetypeIfNeeded(audioBlob);
 
         // Here we actually override the default config + add speakers
         String moreOptionsStr = "{\"enableAutomaticPunctuation\": false,"; // No punctuation
@@ -196,7 +201,9 @@ public class TestSpeechToText {
         DocumentModel doc = coreSession.createDocumentModel("/", "myFile", "File");
         doc.setPropertyValue("dc:title", "myFile");
         File audioFile = FileUtils.getResourceFileFromContext("test-audio.aac");
-        doc.setPropertyValue("file:content", new FileBlob(audioFile));
+        Blob audioBlob = new FileBlob(audioFile);
+        audioBlob = TestUtils.updateMimetypeIfNeeded(audioBlob);
+        doc.setPropertyValue("file:content", (Serializable) audioBlob);
 
         doc = coreSession.createDocument(doc);
         coreSession.save();
@@ -224,7 +231,9 @@ public class TestSpeechToText {
         DocumentModel doc = coreSession.createDocumentModel("/", "myFile", "File");
         doc.setPropertyValue("dc:title", "myFile");
         File audioFile = FileUtils.getResourceFileFromContext("test-audio.aac");
-        doc.setPropertyValue("file:content", new FileBlob(audioFile));
+        Blob audioBlob = new FileBlob(audioFile);
+        audioBlob = TestUtils.updateMimetypeIfNeeded(audioBlob);
+        doc.setPropertyValue("file:content", (Serializable) audioBlob);
 
         doc = coreSession.createDocument(doc);
         coreSession.save();

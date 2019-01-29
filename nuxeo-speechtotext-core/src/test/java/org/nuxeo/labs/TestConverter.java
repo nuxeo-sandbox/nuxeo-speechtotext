@@ -52,6 +52,7 @@ public class TestConverter {
         
         File audioFile = FileUtils.getResourceFileFromContext("test-audio.aac");
         Blob audioBlob = new FileBlob(audioFile);
+        audioBlob = TestUtils.updateMimetypeIfNeeded(audioBlob);
         BlobHolder input = new SimpleBlobHolder(audioBlob);
         BlobHolder result = service.convert(SpeechToText.AUDIO_TO_FLAC_CONVERTER, input, new HashMap<>());
         assertNotNull(result);

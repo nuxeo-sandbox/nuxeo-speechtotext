@@ -14,6 +14,8 @@
 
   <extension point="converter" target="org.nuxeo.ecm.core.convert.service.ConversionServiceImpl">
     <converter class="org.nuxeo.ecm.platform.convert.plugins.CommandLineConverter" name="audio-to-flac">
+      <sourceMimeType>audio/*</sourceMimeType>
+      <sourceMimeType>video/*</sourceMimeType>
       <destinationMimeType>audio/flac</destinationMimeType>
       <parameters>
         <parameter name="CommandLineName">ffmpeg-audio-to-flac</parameter>

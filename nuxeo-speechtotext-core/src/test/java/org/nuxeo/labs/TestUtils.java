@@ -20,6 +20,9 @@ package org.nuxeo.labs;
 
 
 import org.apache.commons.lang3.StringUtils;
+import org.nuxeo.ecm.core.api.Blob;
+import org.nuxeo.ecm.platform.mimetype.interfaces.MimetypeRegistry;
+import org.nuxeo.ecm.platform.mimetype.service.MimetypeRegistryService;
 import org.nuxeo.labs.speechtotext.google.GoogleSpeechToTextProvider;
 import org.nuxeo.runtime.api.Framework;
 
@@ -59,6 +62,18 @@ public class TestUtils {
         }
 
         return credentialFileTest == 1;
+    }
+    
+    public static Blob updateMimetypeIfNeeded(Blob blob) {
+        
+        if(blob != null && StringUtils.isBlank(blob.getMimeType())) {
+            MimetypeRegistryService service = (MimetypeRegistryService) Framework.getService(MimetypeRegistry.class);
+            String mimeType = service.getMimetypeFromFile(blob.getFile()); // getMimeTypeFromBlob fails miserably
+            blob.setMimeType(mimeType);;
+        }
+        
+        return blob;
+        
     }
 
 }
