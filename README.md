@@ -65,7 +65,7 @@ The plugin does not automatically convert `Audio` (or `Video`) files to text. Yo
 Converts a blob of the input document and save the transcript to a field of the input document. The file will be automatically  converted to FLAC if needed, before being sent to the service.
 
 * **Category**: `Conversion`
-* **Input$**: A Document
+* **Input**: A Document
 * **Output**: The modified Document
 * Extracts the blob stored in the `blobXpath` parameter (default "file:content"), transcripts it using the required `languageCode` parameter, and stores the transcription in the `transcriptXpath` field of the Document. _Always use punctuation_. See below for more details on parameters.
 * **Parameters**:
@@ -90,7 +90,7 @@ Running the plugin requires Google Cloud API Key to access their Cloud Services.
 
 ## Build
 
-    git clone https://github.com/nuxeo-speechtotext.git
+    git clone https://github.com/nuxeo-sandbox/nuxeo-speechtotext.git
     cd nuxeo-speechtotext.git
     
     mvn clean install
