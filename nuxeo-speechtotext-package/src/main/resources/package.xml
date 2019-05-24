@@ -1,10 +1,10 @@
 <!-- See documentation at http://doc.nuxeo.com/x/HgIz -->
 <package type="addon" name="nuxeo-speechtotext" version="@VERSION@">
-  <title>Nuxeo speechtotext</title>
+  <title>Nuxeo Speech-to-Text</title>
   <description>
-    <p>Put here an HTML description of your Nuxeo Package.</p>
+    <p>Video and Audio Speech-to-Text using Google Cloud</p>
   </description>
-  <!-- <home-page>http://doc.nuxeo.com/</home-page> -->
+  <home-page>https://github.com/nuxeo-sandbox/nuxeo-speechtotext</home-page>
   <vendor>nuxeo</vendor>
   <installer restart="true" />
   <uninstaller restart="true" />
@@ -38,5 +38,5 @@
   <license>Apache License, Version 2.0</license>
   <license-url>http://www.apache.org/licenses/LICENSE-2.0</license-url>
   <!-- Visibility: PRIVATE | MARKETPLACE | DEV | PUBLIC -->
-  <visibility>DEV</visibility>
+  <visibility>PUBLIC</visibility>
 </package>
