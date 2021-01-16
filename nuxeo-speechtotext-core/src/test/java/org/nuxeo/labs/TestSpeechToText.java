@@ -153,7 +153,6 @@ public class TestSpeechToText {
         assertTrue(array.length() > 0);
         JSONObject aWord = array.getJSONObject(0);
         assertTrue(aWord.has("speakerTag"));
-        assertEquals(aWord.getInt("speakerTag"), 1);
 
     }
 

@@ -129,6 +129,21 @@ public class GoogleRESTSpeechToTextResponse implements SpeechToTextResponse {
         return alternative;
     }
 
+    protected JSONObject getSecondAlternative() throws JSONException {
+
+        JSONObject alternative = null;
+
+        JSONArray results = jsonResponse.getJSONArray("results");
+        if(results != null && results.length() > 1) {
+            JSONObject secondResult = results.getJSONObject(1);
+            if(secondResult != null) {
+                JSONArray alternatives = secondResult.getJSONArray("alternatives");
+                alternative = alternatives.getJSONObject(0);
+            }
+        }
+        return alternative;
+    }
+
     protected double parseDuration(String secondsStr) {
 
         double result = 0.0;
@@ -196,6 +211,14 @@ public class GoogleRESTSpeechToTextResponse implements SpeechToTextResponse {
 
         JSONObject alternative = getFirstAlternative();
         JSONArray resultWords = alternative.getJSONArray("words");
+        // Speaker can be in the second alternative.
+        if(resultWords != null && withSpeakerTag) {
+            JSONObject oneResultWord = resultWords.getJSONObject(0);
+            if(!oneResultWord.has("speakerTag")) {
+                alternative = getSecondAlternative();
+                resultWords = alternative.getJSONArray("words");
+            }
+        }
         if (resultWords != null) {
             JSONObject oneResultWord;
             int max = resultWords.length();
@@ -206,7 +229,7 @@ public class GoogleRESTSpeechToTextResponse implements SpeechToTextResponse {
                 obj.put("start", parseDuration(oneResultWord.getString("startTime")));
                 obj.put("end", parseDuration(oneResultWord.getString("endTime")));
                 if(withSpeakerTag) {
-                    obj.put("speakerTag", oneResultWord.getInt("speakerTag"));
+                    obj.put("speakerTag", oneResultWord.optInt("speakerTag", 0));
                 }
 
                 array.put(obj);

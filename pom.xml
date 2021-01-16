@@ -2,39 +2,68 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.nuxeo.ecm.distribution</groupId>
-    <artifactId>nuxeo-distribution</artifactId>
-    <version>10.10</version>
+    <groupId>org.nuxeo</groupId>
+    <artifactId>nuxeo-parent</artifactId>
+    <version>11.4</version>
   </parent>
 
   <groupId>org.nuxeo.labs</groupId>
   <artifactId>nuxeo-speechtotext-parent</artifactId>
-  <version>10.10-SNAPSHOT</version>
-  <name>Nuxeo speechtotext parent</name>
+  <version>11.4-SNAPSHOT</version>
+  <name>Nuxeo SpeechToText parent</name>
   <description/>
   <packaging>pom</packaging>
+
+  <properties>
+    <nuxeo.skip.enforcer>true</nuxeo.skip.enforcer>
+    <nuxeo.target.version>11.*</nuxeo.target.version>
+  </properties>
 
   <modules>
     <module>nuxeo-speechtotext-core</module>
     <module>nuxeo-speechtotext-package</module>
   </modules>
 
+  <scm />
+  <licenses />
+  <mailingLists />
+  <issueManagement />
+  <ciManagement />
+  <developers />
+  <distributionManagement />
+  
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.nuxeo.labs</groupId>
+        <artifactId>nuxeo-speechtotext-core</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.nuxeo.labs</groupId>
+        <artifactId>nuxeo-speechtotext-package</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <repositories>
     <repository>
-      <id>public</id>
-      <url>http://maven.nuxeo.org/nexus/content/groups/public</url>
+      <id>maven-public</id>
+      <url>https://packages.nuxeo.com/repository/maven-public/</url>
       <releases>
         <enabled>true</enabled>
       </releases>
       <snapshots>
-        <enabled>false</enabled>
+        <updatePolicy>always</updatePolicy>
+        <enabled>true</enabled>
       </snapshots>
     </repository>
     <repository>
-      <id>public-snapshot</id>
-      <url>http://maven.nuxeo.org/nexus/content/groups/public-snapshot</url>
+      <id>maven-internal</id>
+      <url>https://packages.nuxeo.com/repository/maven-internal/</url>
       <releases>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
       </releases>
       <snapshots>
         <updatePolicy>always</updatePolicy>
@@ -56,9 +85,8 @@
 
   <pluginRepositories>
     <pluginRepository>
-      <id>public</id>
-      <url>http://maven.nuxeo.org/nexus/content/groups/public</url>
-      <name>Nuxeo releases</name>
+      <id>maven-public</id>
+      <url>https://packages.nuxeo.com/repository/maven-public/</url>
       <releases>
         <enabled>true</enabled>
       </releases>
@@ -67,18 +95,4 @@
       </snapshots>
     </pluginRepository>
   </pluginRepositories>
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.nuxeo.labs</groupId>
-        <artifactId>nuxeo-speechtotext-core</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.nuxeo.labs</groupId>
-        <artifactId>nuxeo-speechtotext-package</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
 </project>
