@@ -28,5 +28,4 @@ bin/
 *~bak
 *-bak
 *.bak
-credential.json
-credentials.json
+*~gen

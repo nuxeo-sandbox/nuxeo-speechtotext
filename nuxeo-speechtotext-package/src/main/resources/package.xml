@@ -5,7 +5,7 @@
     <p>Video and Audio Speech-to-Text using Google Cloud</p>
   </description>
   <home-page>https://github.com/nuxeo-sandbox/nuxeo-speechtotext</home-page>
-  <vendor>nuxeo</vendor>
+  <vendor>Hyland</vendor>
   <installer restart="true" />
   <uninstaller restart="true" />
   <!-- <hotreload-support>false</hotreload-support> -->
@@ -16,9 +16,7 @@
   <production-state>testing</production-state>
   <supported>false</supported>
   <platforms>
-    <platform>server-@NUXEO_TARGET_VERSION@</platform>
-    <platform>server-2021.*</platform>
-    <platform>server-11.*</platform>
+    <platform>lts-@NUXEO_TARGET_VERSION@</platform>
   </platforms>
   <!-- Dependencies on other packages -->
   <!-- <dependencies> -->

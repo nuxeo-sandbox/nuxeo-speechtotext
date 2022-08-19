@@ -21,6 +21,7 @@
         <filter token="VERSION" value="${maven.project.version}" />
         <filter token="DISTRIB_VERSION" value="${nuxeo.platform.version}" />
         <filter token="NUXEO_TARGET_VERSION" value="${nuxeo.target.version}" />
+        <filter token="STUDIO_PROJECT_VERSION" value="${studio.project.version}" />
       </filterset>
     </copy>
 
@@ -77,7 +78,7 @@
       includesfile="${outdir}/includes"
       excludesfile="${outdir}/excludesfile"
       patternsetid="nxr.versus.distribution"
-      ignoreContent="false"
+      ignoreContent="true"
       ignoreContentPattern=".*\.jar$"></nx:zipdiff>
     <unzip src="${outdir}/nxr-${maven.project.version}.zip" dest="${outdir}/marketplace/install">
       <patternset refid="nxr.versus.distribution" />
@@ -112,7 +113,7 @@
           name="install.templates"
           value="${line.separator}
   &lt;copy dir=&quot;${package.root}/install/templates&quot; todir=&quot;${env.templates}&quot; overwrite=&quot;true&quot; /&gt;${line.separator}
-  &lt;config addtemplate=&quot;plugin-for-v11&quot; /&gt;${line.separator}" />
+  &lt;config addtemplate=&quot;nuxeo-speechtotext-package&quot; /&gt;${line.separator}" />
       </then>
     </if>
 
