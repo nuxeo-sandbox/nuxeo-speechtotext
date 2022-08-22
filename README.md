@@ -1,8 +1,5 @@
 # nuxeo-speechtotext
 
-QA status<br/>
-[![Build Status](https://qa.nuxeo.org/jenkins/buildStatus/icon?job=Sandbox/sandbox_nuxeo-speechtotext-master)](https://qa.nuxeo.org/jenkins/view/Sandbox/job/Sandbox/job/sandbox_nuxeo-speechtotext-master/)
-
 This plug-in uses [Google Cloud Speech-to-Text](https://cloud.google.com/speech-to-text/) **version v1p1beta1** to render an audio file to text, and it uses it _via_ the REST API (not the JAVA Google Speech-to-Text SDK).
 
 
