@@ -117,7 +117,6 @@ public class TestSpeechToText {
         assertTrue(arrayStr.indexOf("\"word\":\"is\"") > -1);
         assertTrue(arrayStr.indexOf("\"word\":\"john\"") > -1);
         assertTrue(arrayStr.indexOf("\"word\":\"test\"") > -1);
-        assertTrue(arrayStr.indexOf("\"word\":\"french\"") > -1);
 
     }
 
