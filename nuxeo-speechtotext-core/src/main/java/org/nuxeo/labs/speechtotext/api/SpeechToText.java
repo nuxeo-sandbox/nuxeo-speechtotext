@@ -98,6 +98,8 @@ public interface SpeechToText {
         while (keys.hasNext()) {
             String key = keys.next();
             Object value = toMerge.get(key);
+            dest.put(key, value);
+            /*
             if (value instanceof String) {
                 dest.put(key, (String) value);
             } else if (value instanceof Double) {
@@ -109,6 +111,7 @@ public interface SpeechToText {
             } else if (value instanceof Boolean) {
                 dest.put(key, ((Boolean) value).booleanValue());
             }
+            */
 
         }
 

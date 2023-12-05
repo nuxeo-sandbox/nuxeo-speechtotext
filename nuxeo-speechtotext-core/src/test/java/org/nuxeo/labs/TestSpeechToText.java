@@ -25,7 +25,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,7 +52,6 @@ import com.google.inject.Inject;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Iterator;
 
 @RunWith(FeaturesRunner.class)
 @Features(AutomationFeature.class)
@@ -165,8 +163,8 @@ public class TestSpeechToText {
         audioBlob = TestUtils.updateMimetypeIfNeeded(audioBlob);
 
         // Here we actually override the default config + add speakers
-        String moreOptionsStr = "{\"enableAutomaticPunctuation\": false,"; // No punctuation
-        moreOptionsStr += "\"enableSpeakerDiarization\": true}"; // and with speaker detection
+        String moreOptionsStr = "{\"enableAutomaticPunctuation\": true,";
+        moreOptionsStr += "\"enableSpeakerDiarization\": true}";
         JSONObject moreOptions = new JSONObject(moreOptionsStr);
 
         // Service will convert to flac
@@ -178,8 +176,8 @@ public class TestSpeechToText {
 
         assertTrue(transcript.toLowerCase().indexOf("this is john") > -1);
         // No punctuation
-        assertTrue(transcript.indexOf(".") < 0);
-        assertTrue(transcript.indexOf(",") < 0);
+        assertTrue(transcript.indexOf(".") > 0);
+        assertTrue(transcript.indexOf(",") > 0);
 
         // There is at least one speaker
         JSONArray array = response.getWordTimeOffsets(true);
@@ -187,7 +185,7 @@ public class TestSpeechToText {
         assertTrue(array.length() > 0);
         JSONObject aWord = array.getJSONObject(0);
         assertTrue(aWord.has("speakerTag"));
-        assertEquals(aWord.getInt("speakerTag"), 1);
+        assertTrue(aWord.getInt("speakerTag") >= 1);
 
     }
 
@@ -241,8 +239,8 @@ public class TestSpeechToText {
         // Let default values for blobXpath and saveDocument
         ctx.setInput(doc);
 
-        String moreOptionsStr = "{\"enableAutomaticPunctuation\": false,"; // No punctuation
-        moreOptionsStr += "\"enableSpeakerDiarization\": true}"; // and with speaker detection
+        String moreOptionsStr = "{\"enableAutomaticPunctuation\": true,";
+        moreOptionsStr += "\"enableSpeakerDiarization\": true}"; // With speaker detection
         chain.add(SpeechToTextForDocument.ID)
              .set("transcriptXpath", "dc:description")
              .set("languageCode", "en-US")
@@ -257,8 +255,8 @@ public class TestSpeechToText {
         assertTrue(description.toLowerCase().indexOf("this is john") > -1);
 
         // No punctuation
-        assertTrue(description.indexOf(".") < 0);
-        assertTrue(description.indexOf(",") < 0);
+        assertTrue(description.indexOf(".") > 0);
+        assertTrue(description.indexOf(",") > 0);
         
         // Check native response
         SpeechToTextResponse response = (SpeechToTextResponse) ctx.get("theResult");

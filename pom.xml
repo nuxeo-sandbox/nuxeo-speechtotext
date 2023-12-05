@@ -4,12 +4,12 @@
   <parent>
     <groupId>org.nuxeo</groupId>
     <artifactId>nuxeo-parent</artifactId>
-    <version>2021.18</version>
+    <version>2023.2</version>
   </parent>
 
   <groupId>org.nuxeo.labs</groupId>
   <artifactId>nuxeo-speechtotext-parent</artifactId>
-  <version>2021.0.1-SNAPSHOT</version>
+  <version>2023.0.1-SNAPSHOT</version>
   <name>Nuxeo speechtotext parent</name>
   <description />
   <packaging>pom</packaging>
@@ -17,7 +17,7 @@
   <properties>
     <!-- Skip Nuxeo enforcer rules by default -->
     <nuxeo.skip.enforcer>true</nuxeo.skip.enforcer>
-    <nuxeo.target.version>2021.*</nuxeo.target.version>
+    <nuxeo.target.version>2023.*</nuxeo.target.version>
   </properties>
 
   <modules>

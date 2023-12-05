@@ -69,7 +69,7 @@ public class SpeechToTextImpl extends DefaultComponent implements SpeechToText {
      * @param context the component context. Use it to get the current bundle context
      * @throws Exception
      */
-    @Override
+    //@Override
     public void applicationStarted(ComponentContext context) {
         // do nothing by default. You can remove this method if not used.
     }

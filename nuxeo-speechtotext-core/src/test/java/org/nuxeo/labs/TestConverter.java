@@ -23,9 +23,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.ecm.core.api.Blob;
-import org.nuxeo.ecm.core.api.CoreSession;
-import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.api.NuxeoPrincipal;
 import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
 import org.nuxeo.ecm.core.api.blobholder.SimpleBlobHolder;
 import org.nuxeo.ecm.core.api.impl.blob.FileBlob;
@@ -52,17 +49,7 @@ public class TestConverter {
 
     @Test
     public void testConverter() {
-        
-        NuxeoPrincipal p;
-        
-        p = NuxeoPrincipal.getCurrent();
-        DocumentModel dm = p.getModel();
-        dm.setPropertyValue("user:company", "toto");
-        CoreSession session = dm.getCoreSession();
-        session.saveDocument(dm);
-        dm.refresh();
-        String v = (String) dm.getPropertyValue("user:company");
-        
+
         File audioFile = FileUtils.getResourceFileFromContext("test-audio.aac");
         Blob audioBlob = new FileBlob(audioFile);
         audioBlob = TestUtils.updateMimetypeIfNeeded(audioBlob);
