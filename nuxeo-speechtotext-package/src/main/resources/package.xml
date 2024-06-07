@@ -15,10 +15,9 @@
   <!-- Production State: production_ready | testing | proto -->
   <production-state>testing</production-state>
   <supported>false</supported>
-  <target-platform>
-    <name>lts</name>
-    <version>[2023.1,2024)</version>
-  </target-platform>
+  <platforms>
+    <platform>lts-@NUXEO_TARGET_VERSION@</platform>
+  </platforms>
   <!-- Dependencies on other packages -->
   <!-- <dependencies> -->
   <!-- <package>another-package:1.0.0:1.0.0</package> -->
@@ -36,7 +35,7 @@
   <!-- <package>an-embedded-package:1.0.0:1.0.0</package> -->
   <!-- </provides> -->
   <license>Apache License, Version 2.0</license>
-  <license-url>http://www.apache.org/licenses/LICENSE-2.0</license-url>
+  <license-url>https://www.apache.org/licenses/LICENSE-2.0</license-url>
   <!-- Visibility: PRIVATE | MARKETPLACE | DEV | PUBLIC -->
   <visibility>PUBLIC</visibility>
 </package>
