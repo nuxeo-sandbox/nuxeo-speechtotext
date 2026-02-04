@@ -123,12 +123,11 @@ public class TestSpeechToText {
 
         assumeTrue("Google credentials not found => no test", TestUtils.loadGoogleCredentials());
 
-        // SOP far we just have the single speaker audio. Still using it.
-        File audioFile = FileUtils.getResourceFileFromContext("test-audio.aac");
+        // Use multi-speaker audio file
+        File audioFile = FileUtils.getResourceFileFromContext("test-audio-multispeaker.flac");
         Blob audioBlob = new FileBlob(audioFile);
         audioBlob = TestUtils.updateMimetypeIfNeeded(audioBlob);
 
-        // Service will convert to flac
         // No punctuation for this test
         SpeechToTextOptions options = new SpeechToTextOptions(false, false);
         // Set speaker detection
@@ -136,20 +135,40 @@ public class TestSpeechToText {
         SpeechToTextResponse response = speechToText.run(options, audioBlob, "en-US", null);
         assertNotNull(response);
 
-        // As of "today" (writing of this test, 2018-11), Google API does not detect 2 different speakers...
-        // Let's check it at least get some works from each speaker
+        // Let's check it at least get some words from each speaker
         String transcript = response.getText();
         assertNotNull(transcript);
 
+        // Check transcript contains expected content from multi-speaker audio
+        // Reminder: punctuation is disabled for this test
         String transcriptLC = transcript.toLowerCase();
-        assertTrue(transcriptLC.indexOf("this is john") > -1);
+        assertTrue(transcriptLC.indexOf("hello this is speaker 1") > -1);
 
-        // Still, check there is at least one speaker
+        // Check that word time offsets are returned
         JSONArray array = response.getWordTimeOffsets(true);
         assertNotNull(array);
         assertTrue(array.length() > 0);
-        JSONObject aWord = array.getJSONObject(0);
-        assertTrue(aWord.has("speakerTag"));
+
+        // Verify speakerLabel field exists and has values
+        JSONObject firstWord = array.getJSONObject(0);
+        assertTrue(firstWord.has("speakerLabel"));
+        assertNotNull(firstWord.getString("speakerLabel"));
+        assertTrue(!firstWord.getString("speakerLabel").isEmpty());
+
+        // Check that multiple speakers are detected by finding different speaker labels
+        String firstSpeaker = firstWord.getString("speakerLabel");
+        boolean foundDifferentSpeaker = false;
+        for (int i = 1; i < array.length(); i++) {
+            JSONObject word = array.getJSONObject(i);
+            if (word.has("speakerLabel")) {
+                String speaker = word.getString("speakerLabel");
+                if (!speaker.equals(firstSpeaker)) {
+                    foundDifferentSpeaker = true;
+                    break;
+                }
+            }
+        }
+        assertTrue("Should detect multiple speakers in multi-speaker audio", foundDifferentSpeaker);
 
     }
 
@@ -158,34 +177,35 @@ public class TestSpeechToText {
 
         assumeTrue("Google credentials not found => no test", TestUtils.loadGoogleCredentials());
 
-        File audioFile = FileUtils.getResourceFileFromContext("test-audio.aac");
+        // Use multi-speaker audio file
+        File audioFile = FileUtils.getResourceFileFromContext("test-audio-multispeaker.flac");
         Blob audioBlob = new FileBlob(audioFile);
         audioBlob = TestUtils.updateMimetypeIfNeeded(audioBlob);
 
-        // Here we actually override the default config + add speakers
+        // Here we actually override the default configuration with more options.
         String moreOptionsStr = "{\"enableAutomaticPunctuation\": true,";
         moreOptionsStr += "\"enableSpeakerDiarization\": true}";
         JSONObject moreOptions = new JSONObject(moreOptionsStr);
 
-        // Service will convert to flac
         SpeechToTextResponse response = speechToText.run(null, audioBlob, "en-US", moreOptions);
         assertNotNull(response);
 
         String transcript = response.getText();
         assertNotNull(transcript);
 
-        assertTrue(transcript.toLowerCase().indexOf("this is john") > -1);
-        // No punctuation
+        // Reminder: punctuation is enabled for this test
+        assertTrue(transcript.toLowerCase().indexOf("hello. this is speaker 1.") > -1);
         assertTrue(transcript.indexOf(".") > 0);
-        assertTrue(transcript.indexOf(",") > 0);
 
-        // There is at least one speaker
+        // Check that word time offsets are returned
         JSONArray array = response.getWordTimeOffsets(true);
         assertNotNull(array);
         assertTrue(array.length() > 0);
+
+        // Verify speakerLabel field exists and has values
         JSONObject aWord = array.getJSONObject(0);
-        assertTrue(aWord.has("speakerTag"));
-        assertTrue(aWord.getInt("speakerTag") >= 1);
+        assertTrue(aWord.has("speakerLabel"));
+        assertTrue(!aWord.getString("speakerLabel").isEmpty());
 
     }
 
@@ -226,7 +246,7 @@ public class TestSpeechToText {
 
         DocumentModel doc = coreSession.createDocumentModel("/", "myFile", "File");
         doc.setPropertyValue("dc:title", "myFile");
-        File audioFile = FileUtils.getResourceFileFromContext("test-audio.aac");
+        File audioFile = FileUtils.getResourceFileFromContext("test-audio-multispeaker.flac");
         Blob audioBlob = new FileBlob(audioFile);
         audioBlob = TestUtils.updateMimetypeIfNeeded(audioBlob);
         doc.setPropertyValue("file:content", (Serializable) audioBlob);
@@ -252,23 +272,24 @@ public class TestSpeechToText {
         assertNotNull(result);
         String description = (String) doc.getPropertyValue("dc:description");
         assertNotNull(description);
-        assertTrue(description.toLowerCase().indexOf("this is john") > -1);
+        assertTrue(description.toLowerCase().indexOf("hello. this is speaker 1.") > -1);
 
-        // No punctuation
+        // Punctuation is enabled
         assertTrue(description.indexOf(".") > 0);
-        assertTrue(description.indexOf(",") > 0);
-        
+
         // Check native response
         SpeechToTextResponse response = (SpeechToTextResponse) ctx.get("theResult");
         assertNotNull(response);
-        
-        // There is at least one speaker
+
+        // Check that word time offsets with speaker info are returned
         JSONArray array = response.getWordTimeOffsets(true);
         assertNotNull(array);
         assertTrue(array.length() > 0);
+
+        // Verify speakerLabel field exists and has values
         JSONObject aWord = array.getJSONObject(0);
-        assertTrue(aWord.has("speakerTag"));
-        assertEquals(aWord.getInt("speakerTag"), 1);
+        assertTrue(aWord.has("speakerLabel"));
+        assertTrue(!aWord.getString("speakerLabel").isEmpty());
 
     }
 }
