@@ -214,7 +214,7 @@ public class GoogleRESTSpeechToTextResponse implements SpeechToTextResponse {
         // Speaker can be in the second alternative.
         if(resultWords != null && withSpeakerTag) {
             JSONObject oneResultWord = resultWords.getJSONObject(0);
-            if(!oneResultWord.has("speakerTag")) {
+            if(!oneResultWord.has("speakerLabel")) {
                 alternative = getSecondAlternative();
                 resultWords = alternative.getJSONArray("words");
             }
@@ -229,7 +229,7 @@ public class GoogleRESTSpeechToTextResponse implements SpeechToTextResponse {
                 obj.put("start", parseDuration(oneResultWord.getString("startTime")));
                 obj.put("end", parseDuration(oneResultWord.getString("endTime")));
                 if(withSpeakerTag) {
-                    obj.put("speakerTag", oneResultWord.optInt("speakerTag", 0));
+                    obj.put("speakerLabel", oneResultWord.optString("speakerLabel", ""));
                 }
 
                 array.put(obj);
